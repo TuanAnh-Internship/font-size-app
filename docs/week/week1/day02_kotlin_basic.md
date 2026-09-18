@@ -82,3 +82,12 @@ Success
 [main 8b58d10] feat: add font size data model
 4 files changed, 66 insertions(+)
 ```
+
+## Nhật ký Ngày 02
+- Tìm hiểu cấu trúc project Android Native, vai trò của từng file và thư mục chính trong project.
+- Học Kotlin cơ bản đủ dùng cho project: val/var, kiểu dữ liệu, if, when, function, nullable, data class, List. Thực hành qua 8 bài tập chạy trực tiếp bằng Gradle.
+- Tạo package model, xây dựng data class FontSizeOption với label và scale, tạo danh sách 4 font size option mẫu trong FontSizeData.kt.
+- Viết 3 hàm xử lý dữ liệu: isLargeFont, findFontOption, getDefaultFontOption. Kiểm tra kết quả qua ADB Logcat trên thiết bị thật.
+- Build project thành công, cài APK lên điện thoại Android thật qua ADB, xác nhận các hàm chạy đúng.
+- Tạo giao diện demo đơn giản bằng Jetpack Compose hiển thị danh sách font size, cho phép chọn và xem trước kích thước chữ trực tiếp trên màn hình.
+- Commit source lên GitHub.
