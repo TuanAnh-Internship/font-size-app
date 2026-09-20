@@ -3,7 +3,16 @@
 # Cach dung: .\deploy.ps1
 # Chay tu thu muc: font-size-app\source\
 
-$DEVICE = "adb-R9JN60YZSVJ-FVMKFl._adb-tls-connect._tcp"
+# Tu dong lay thiet bi dang ket noi qua adb
+$devices = @(adb devices | Where-Object { $_ -match '\s+device$' })
+if ($devices.Count -eq 0) {
+    Write-Host "KHONG TIM THAY THIET BI ADB NAO DANG KET NOI!" -ForegroundColor Red
+    Write-Host "Hay kiem tra adb connect hoac cam cap USB." -ForegroundColor Yellow
+    exit 1
+}
+$DEVICE = ($devices[0].Trim() -split '\s+')[0]
+Write-Host ">>> Phat hien thiet bi: $DEVICE" -ForegroundColor Yellow
+
 $APK    = ".\app\build\outputs\apk\debug\app-debug.apk"
 $PKG    = "com.example.fontsizecontroller"
 $TAG    = "FontSizeTest"

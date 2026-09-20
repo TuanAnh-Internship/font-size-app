@@ -1,0 +1,79 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="0lM9YUyjEZe432CXmf3H">
+    <mxGraphModel dx="1308" dy="677" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="n_start" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" value="Mở ứng dụng" vertex="1">
+          <mxGeometry height="60" width="140" x="380" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="n_read" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Đọc FONT_SCALE&#xa;và canWrite()" vertex="1">
+          <mxGeometry height="50" width="160" x="370" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="n_ready" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" value="Giao diện Ready:&#xa;Hiển thị cỡ chữ hiện tại" vertex="1">
+          <mxGeometry height="50" width="160" x="370" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="n_select" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Chọn Preset &amp; Xem Preview&#xa;(Small / Normal / Large / XL)" vertex="1">
+          <mxGeometry height="50" width="200" x="350" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="n_apply" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;" value="Bấm nút &#39;Áp dụng&#39;" vertex="1">
+          <mxGeometry height="50" width="160" x="370" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="n_canwrite" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;" value="canWrite() == true?" vertex="1">
+          <mxGeometry height="80" width="180" x="360" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="n_write" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Ghi Settings.System&#xa;và đọc lại Verify" vertex="1">
+          <mxGeometry height="60" width="170" x="365" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="n_perm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="Hiển thị màn hình/Dialog&#xa;Yêu cầu cấp quyền WRITE_SETTINGS" vertex="1">
+          <mxGeometry height="60" width="220" x="680" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="n_verify" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;" value="Verify khớp giá trị?" vertex="1">
+          <mxGeometry height="80" width="180" x="360" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="n_success" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" value="Màn hình Success&#xa;Áp dụng thành công!" vertex="1">
+          <mxGeometry height="60" width="170" x="150" y="780" as="geometry" />
+        </mxCell>
+        <mxCell id="n_error" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;" value="Màn hình Error&#xa;Ghi thất bại / Thử lại" vertex="1">
+          <mxGeometry height="60" width="170" x="365" y="780" as="geometry" />
+        </mxCell>
+        <mxCell id="n_unsupported" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;" value="Màn hình Unsupported&#xa;OEM chặn ngầm / Hướng dẫn mở Cài đặt" vertex="1">
+          <mxGeometry height="60" width="220" x="575" y="780" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="n_start" target="n_read">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="n_read" target="n_ready">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="n_ready" target="n_select">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="n_select" target="n_apply">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="n_apply" target="n_canwrite">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="n_canwrite" target="n_write" value="Đã cấp quyền">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="n_canwrite" target="n_perm" value="Chưa cấp quyền">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="n_write" target="n_verify">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="n_verify" target="n_success" value="Khớp 100%">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="n_verify" target="n_error" value="Lỗi ghi">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="n_verify" target="n_unsupported" value="Bị OEM chặn">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

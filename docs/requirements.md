@@ -56,7 +56,9 @@ Giải pháp
 | P1-F06 | Result Feedback | Must-have | Thông báo success/failure/guidance |
 | P1-F07 | Reset Default | Nice-to-have | Quay về mức mặc định nếu phạm vi cho phép |
 | P1-F08 | Remember Last Choice | Nice-to-have | Lưu lựa chọn gần nhất nếu UX cần |
-| P1-AI01 | Smart Font Recommendation | Proposed AI | Gợi ý mức font dựa trên nhu cầu đọc |
+| P1-F09 | System Bold Text | Proposed v2 | Công tắc bật/tắt chữ đậm toàn hệ thống tăng khả năng đọc |
+| P1-F10 | Font Style Gallery | Proposed v2 | Bộ sưu tập phông chữ đa dạng (Serif, Sans-serif, Cursive) |
+| P1-AI01 | Smart Font Recommendation | Proposed AI | Bài test đọc thị lực hỗ trợ gợi ý mức font và chữ đậm tối ưu |
 
 ## 6. Functional Requirements
 
