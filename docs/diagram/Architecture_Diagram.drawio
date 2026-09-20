@@ -1,0 +1,139 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="JyecgtGq1MbEmlRtZ5E_">
+    <mxGraphModel dx="1869" dy="1917" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="user" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" value="User&#xa;(Người dùng)" vertex="1">
+          <mxGeometry height="70" width="50" x="220" y="-40" as="geometry" />
+        </mxCell>
+        <mxCell id="g_ui" parent="1" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f5fbf5;strokeColor=#82b366;fontStyle=1;fontSize=14;rounded=1;dashed=1;" value="1. UI Layer (Jetpack Compose)" vertex="1">
+          <mxGeometry height="120" width="760" x="120" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="c_screen" parent="g_ui" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" value="FontSizeScreen&#xa;(Scaffold &amp; Event Handler)" vertex="1">
+          <mxGeometry height="60" width="200" x="40" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="c_comp" parent="g_ui" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=11;" value="UI Components:&#xa;FontPresetCard&#xa;FontPreviewCard / StatusMessage" vertex="1">
+          <mxGeometry height="60" width="220" x="320" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="c_theme" parent="g_ui" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=11;" value="Theme &amp; Style:&#xa;MaterialTheme&#xa;Color, Typography" vertex="1">
+          <mxGeometry height="60" width="180" x="550" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="c_screen_to_comp" edge="1" parent="g_ui" source="c_screen" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#82b366;strokeWidth=1;dashed=1;fontSize=10;" target="c_comp" value="chứa / gọi">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="g_vm" parent="1" style="swimlane;whiteSpace=wrap;html=1;fillColor=#fffbf5;strokeColor=#d79b00;fontStyle=1;fontSize=14;rounded=1;dashed=1;" value="2. ViewModel Layer" vertex="1">
+          <mxGeometry height="120" width="760" x="120" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="c_vm" parent="g_vm" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;fontStyle=1;" value="FontSizeViewModel&#xa;(Action Handlers &amp; Coroutine Scope)" vertex="1">
+          <mxGeometry height="60" width="260" x="40" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="c_state" parent="g_vm" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;fontStyle=1;" value="StateFlow&lt;FontSizeUiState&gt;&#xa;(Immutable UI State)" vertex="1">
+          <mxGeometry height="60" width="260" x="460" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="c_vm_to_state" edge="1" parent="g_vm" source="c_vm" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#d79b00;strokeWidth=2;fontSize=11;fontColor=#d79b00;" target="c_state" value="_uiState.update { ... }">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="g_repo" parent="1" style="swimlane;whiteSpace=wrap;html=1;fillColor=#faf5fc;strokeColor=#9673a6;fontStyle=1;fontSize=14;rounded=1;dashed=1;" value="3. Repository &amp; Model Layer" vertex="1">
+          <mxGeometry height="120" width="960" x="120" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="c_repo" parent="g_repo" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontStyle=1;" value="FontSettingsRepository&#xa;(Interface &amp; Implementation)" vertex="1">
+          <mxGeometry height="60" width="260" x="40" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="c_mapper" parent="g_repo" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;fontSize=11;" value="FontScaleMapper&#xa;(Scale &lt;--&gt; Preset Option)" vertex="1">
+          <mxGeometry height="60" width="180" x="435" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="c_model" parent="g_repo" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;fontSize=11;" value="Models:&#xa;FontSizeOption&#xa;FontScaleResult" vertex="1">
+          <mxGeometry height="60" width="180" x="750" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="c_repo_to_mapper" edge="1" parent="g_repo" source="c_repo" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#9673a6;strokeWidth=1;dashed=1;fontSize=10;" target="c_mapper" value="mapScaleToOption">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="g_sys" parent="1" style="swimlane;whiteSpace=wrap;html=1;fillColor=#fdf5f5;strokeColor=#b85450;fontStyle=1;fontSize=14;rounded=1;dashed=1;" value="4. Android System API Layer" vertex="1">
+          <mxGeometry height="120" width="960" x="120" y="790" as="geometry" />
+        </mxCell>
+        <mxCell id="c_resolver" parent="g_sys" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;fontStyle=1;" value="ContentResolver&#xa;(putFloat / getFloat)" vertex="1">
+          <mxGeometry height="60" width="200" x="40" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="c_settings" parent="g_sys" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;fontSize=11;" value="Settings.System&#xa;(FONT_SCALE, canWrite)" vertex="1">
+          <mxGeometry height="60" width="200" x="420" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="c_config" parent="g_sys" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;fontSize=11;" value="Configuration / Resources&#xa;(configuration.fontScale)" vertex="1">
+          <mxGeometry height="60" width="200" x="730" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="c_res_to_sys" edge="1" parent="g_sys" source="c_resolver" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#b85450;strokeWidth=1;dashed=1;fontSize=10;" target="c_settings" value="truy vấn key">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="d_user_screen" edge="1" parent="1" source="user" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#2D7600;strokeWidth=2;fontSize=11;fontColor=#2D7600;" target="c_screen" value="1. Tương tác&amp;nbsp;&lt;div&gt;(Chạm chọn preset / Bấm Apply)&lt;/div&gt;">
+          <mxGeometry relative="1" x="-0.0588" y="-80" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="190" y="-5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="d_screen_user" edge="1" parent="1" source="c_screen" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#B85450;strokeWidth=2;dashed=1;fontSize=11;fontColor=#B85450;exitX=0.903;exitY=-0.019;exitDx=0;exitDy=0;exitPerimeter=0;" target="user" value="8. Render UI&amp;nbsp;&lt;div&gt;(Hiển thị preview &amp;amp; thông báo)&lt;/div&gt;">
+          <mxGeometry relative="1" x="-0.0588" y="-80" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="340.6" y="-5" />
+            </Array>
+            <mxPoint x="270" y="200" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="d_screen_vm" edge="1" parent="1" source="c_screen" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#2D7600;strokeWidth=2;fontSize=11;fontColor=#2D7600;entryX=0.116;entryY=0.018;entryDx=0;entryDy=0;entryPerimeter=0;" target="c_vm" value="2. Gửi action:&amp;nbsp;&lt;div&gt;selectOption() / applySelectedScale()&lt;/div&gt;">
+          <mxGeometry relative="1" x="-0.0746" y="-80" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="190" y="300" />
+              <mxPoint x="190" y="300" />
+            </Array>
+            <mxPoint x="260.62" y="410.84000000000015" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="d_vm_repo" edge="1" parent="1" source="c_vm" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#2D7600;strokeWidth=2;fontSize=11;fontColor=#2D7600;" target="c_repo" value="3. Gọi hàm:&amp;nbsp;&lt;div&gt;repository.applyFontScale(scale)&lt;/div&gt;">
+          <mxGeometry relative="1" x="-0.0667" y="-80" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="180" y="520" />
+              <mxPoint x="180" y="520" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="d_repo_res" edge="1" parent="1" source="c_repo" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#2D7600;strokeWidth=2;fontSize=11;fontColor=#2D7600;exitX=0.077;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.101;entryY=0.041;entryDx=0;entryDy=0;entryPerimeter=0;" target="c_resolver" value="4. Ghi hệ thống:&amp;nbsp;&lt;div&gt;putFloat(resolver, FONT_SCALE, scale)&lt;/div&gt;">
+          <mxGeometry relative="1" x="-0.0174" y="-70" as="geometry">
+            <mxPoint x="1" y="4" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="u_res_repo" edge="1" parent="1" source="c_resolver" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#B85450;strokeWidth=2;dashed=1;fontSize=11;fontColor=#B85450;" target="c_repo" value="5. Đọc lại xác minh:&amp;nbsp;&lt;div&gt;getFloat(...) == targetScale&lt;/div&gt;">
+          <mxGeometry relative="1" x="0.0667" y="-80" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="340" y="760" />
+              <mxPoint x="340" y="760" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="u_repo_vm" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#B85450;strokeWidth=2;dashed=1;fontSize=11;fontColor=#B85450;" value="6. Trả về FontScaleResult&amp;nbsp;&lt;div&gt;(Success / Permission / Error)&lt;/div&gt;">
+          <mxGeometry relative="1" x="0.1333" y="-80" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="340" y="555" />
+              <mxPoint x="340" y="495" />
+            </Array>
+            <mxPoint x="340" y="625" as="sourcePoint" />
+            <mxPoint x="340" y="475" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="u_state_screen" edge="1" parent="1" source="c_state" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#B85450;strokeWidth=2;dashed=1;fontSize=11;fontColor=#B85450;" target="c_screen" value="7. collectAsState(): phát State mới để Compose vẽ lại">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="710.03" y="330.03" />
+              <mxPoint x="340.03" y="330.03" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
