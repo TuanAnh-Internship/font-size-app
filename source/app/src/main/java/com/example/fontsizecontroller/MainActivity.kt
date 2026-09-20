@@ -21,6 +21,7 @@ import com.example.fontsizecontroller.model.findFontOption
 import com.example.fontsizecontroller.model.fontSizeOptions
 import com.example.fontsizecontroller.model.getDefaultFontOption
 import com.example.fontsizecontroller.model.isLargeFont
+import com.example.fontsizecontroller.ui.screen.PocScreen
 import com.example.fontsizecontroller.ui.theme.FontSizeControllerTheme
 
 private const val TAG = "FontSizeTest"
@@ -29,20 +30,28 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // ── TEST các hàm trong FontSizeUtils (log để kiểm tra) ───────
-        Log.d(TAG, "=== TEST FontSizeUtils ===")
-        Log.d(TAG, "isLargeFont(0.85f) = ${isLargeFont(0.85f)}")
-        Log.d(TAG, "isLargeFont(1.15f) = ${isLargeFont(1.15f)}")
-        Log.d(TAG, "findFontOption(\"Large\")   = ${findFontOption("Large")}")
-        Log.d(TAG, "findFontOption(\"Unknown\") = ${findFontOption("Unknown")}")
-        Log.d(TAG, "getDefaultFontOption()    = ${getDefaultFontOption()}")
-        Log.d(TAG, "=== TEST DONE ===")
-        // ─────────────────────────────────────────────────────────────
-
         enableEdgeToEdge()
         setContent {
             FontSizeControllerTheme {
-                FontSizeDemoScreen()
+                var showPoc by remember { mutableStateOf(true) }
+
+                if (showPoc) {
+                    PocScreen(
+                        onNavigateBack = { showPoc = false }
+                    )
+                } else {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        FontSizeDemoScreen()
+                        Button(
+                            onClick = { showPoc = true },
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(24.dp)
+                        ) {
+                            Text("Mở POC Screen")
+                        }
+                    }
+                }
             }
         }
     }
