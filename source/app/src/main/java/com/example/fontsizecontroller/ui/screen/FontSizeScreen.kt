@@ -1,108 +1,223 @@
 package com.example.fontsizecontroller.ui.screen
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.fontsizecontroller.model.AppLanguage
 import com.example.fontsizecontroller.model.FontSizeOption
 import com.example.fontsizecontroller.model.FontSizeUiState
-import com.example.fontsizecontroller.model.fontSizeOptions
-import com.example.fontsizecontroller.ui.component.FontPresetCard
+import com.example.fontsizecontroller.ui.component.CurrentFontCard
+import com.example.fontsizecontroller.ui.component.FontPresetGrid
 import com.example.fontsizecontroller.ui.component.FontPreviewCard
-import com.example.fontsizecontroller.ui.component.StatusMessage
+import com.example.fontsizecontroller.ui.component.TopAppBarWithLanguage
+import com.example.fontsizecontroller.ui.theme.BadgeTint
+import com.example.fontsizecontroller.ui.theme.BorderLight
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material.icons.outlined.Accessibility
+import androidx.compose.material3.Icon
+import com.example.fontsizecontroller.ui.theme.NavyPrimary
+import com.example.fontsizecontroller.ui.theme.PurpleAccent
+import com.example.fontsizecontroller.util.FontScaleMapper
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FontSizeScreen(
     uiState: FontSizeUiState,
     onSelectOption: (FontSizeOption) -> Unit,
     onApply: () -> Unit,
+    onBackClick: () -> Unit,
+    onToggleLanguage: () -> Unit,
+    onToggleDarkMode: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val scrollState = rememberScrollState()
+
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Quản lý cỡ chữ") }
+            TopAppBarWithLanguage(
+                title = if (uiState.language == AppLanguage.VI) "Điều Chỉnh Cỡ Chữ" else "Adjust Font Size",
+                language = uiState.language,
+                isDarkMode = uiState.isDarkMode,
+                onBackClick = onBackClick,
+                onToggleLanguage = onToggleLanguage,
+                onToggleDarkMode = onToggleDarkMode
             )
         },
+        containerColor = MaterialTheme.colorScheme.background,
         modifier = modifier
     ) { innerPadding ->
         if (uiState.isLoading) {
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
-                verticalArrangement = Arrangement.Center
+                contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(color = PurpleAccent)
             }
         } else {
-            LazyColumn(
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(horizontal = 20.dp)
+                    .verticalScroll(scrollState),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                item {
+                Spacer(modifier = Modifier.height(2.dp))
+
+                // Thẻ thông tin cỡ chữ hiện tại
+                CurrentFontCard(
+                    currentScale = uiState.currentScale,
+                    currentLabel = uiState.currentLabel,
+                    language = uiState.language
+                )
+
+                // Khung xem trước trực quan (co giãn tức thì khi chọn)
+                FontPreviewCard(
+                    selectedOption = uiState.selectedOption,
+                    language = uiState.language
+                )
+
+                // Lưới 4 Preset chọn cỡ chữ
+                FontPresetGrid(
+                    presets = FontScaleMapper.defaultPresets,
+                    selectedOption = uiState.selectedOption,
+                    language = uiState.language,
+                    onSelect = onSelectOption
+                )
+
+                // Thanh trượt tự chọn cỡ chữ an toàn (0.80x - 1.40x)
+                com.example.fontsizecontroller.ui.component.CustomFontSliderCard(
+                    currentScale = uiState.selectedOption?.scale ?: uiState.currentScale ?: 1.0f,
+                    language = uiState.language,
+                    onScaleChanged = onSelectOption
+                )
+
+                // Nút hành động chính "Áp dụng cỡ chữ"
+                val isCurrentPreset = uiState.selectedOption != null &&
+                        uiState.currentScale != null &&
+                        kotlin.math.abs(uiState.selectedOption.scale - uiState.currentScale) < 0.01f
+
+                Button(
+                    onClick = onApply,
+                    enabled = !uiState.isApplying && !isCurrentPreset,
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                        disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f)
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                ) {
                     Text(
-                        text = "Cỡ chữ hiện tại: ${uiState.currentScale?.let { "${it}x" } ?: "Chưa rõ"}",
-                        style = MaterialTheme.typography.titleMedium
+                        text = when {
+                            uiState.isApplying ->
+                                if (uiState.language == AppLanguage.VI) "Đang áp dụng..." else "Applying..."
+                            isCurrentPreset ->
+                                if (uiState.language == AppLanguage.VI) "Đang sử dụng cỡ chữ này" else "Currently Active"
+                            else ->
+                                if (uiState.language == AppLanguage.VI) "Áp Dụng Cỡ Chữ" else "Apply Font Scale"
+                        },
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
 
-                item {
-                    FontPreviewCard(selectedOption = uiState.selectedOption)
-                }
-
-                item {
-                    Text(
-                        text = "Chọn cỡ chữ mong muốn:",
-                        style = MaterialTheme.typography.titleSmall
-                    )
-                }
-
-                items(fontSizeOptions) { option ->
-                    FontPresetCard(
-                        option = option,
-                        isSelected = uiState.selectedOption?.scale == option.scale,
-                        onSelect = onSelectOption
-                    )
-                }
-
-                item {
-                    StatusMessage(
-                        status = uiState.status,
-                        message = uiState.message
-                    )
-                }
-
-                item {
-                    val isSameScale = uiState.selectedOption?.scale == uiState.currentScale
-                    Button(
-                        onClick = onApply,
-                        enabled = !uiState.isApplying && !isSameScale,
-                        modifier = Modifier.fillMaxWidth()
+                // Thẻ liên kết mở rộng Trợ Năng & Kiểu Chữ (Navigation Ready)
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
+                        .clickable { /* Sẵn sàng cho màn hình Trợ Năng ở Ngày tiếp theo */ }
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(if (uiState.isApplying) "Đang áp dụng..." else "Áp dụng cỡ chữ")
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Accessibility,
+                                    contentDescription = "Accessibility",
+                                    tint = PurpleAccent,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = if (uiState.language == AppLanguage.VI) "Bộ Trợ Năng Mở Rộng" else "Accessibility Suite",
+                                    style = MaterialTheme.typography.titleSmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                )
+                                Text(
+                                    text = if (uiState.language == AppLanguage.VI) "Kiểm tra thị lực & Phông chữ đa dạng" else "Eye test & Custom Font Styles",
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontSize = 12.sp
+                                    )
+                                )
+                            }
+                        }
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
+                            contentDescription = "Go",
+                            tint = PurpleAccent,
+                            modifier = Modifier.size(18.dp)
+                        )
                     }
-                    Spacer(modifier = Modifier.height(24.dp))
                 }
+
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }

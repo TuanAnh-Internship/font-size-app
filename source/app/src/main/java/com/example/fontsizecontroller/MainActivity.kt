@@ -1,196 +1,116 @@
 package com.example.fontsizecontroller
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.util.Log
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.fontsizecontroller.model.FontSizeOption
-import com.example.fontsizecontroller.model.findFontOption
-import com.example.fontsizecontroller.model.fontSizeOptions
-import com.example.fontsizecontroller.model.getDefaultFontOption
-import com.example.fontsizecontroller.model.isLargeFont
-import com.example.fontsizecontroller.ui.screen.PocScreen
+import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.example.fontsizecontroller.model.ApplyUiResult
+import com.example.fontsizecontroller.model.ScreenDestination
+import com.example.fontsizecontroller.repository.SystemFontSettingsRepository
+import com.example.fontsizecontroller.repository.SystemFontSettingsRepositoryImpl
+import com.example.fontsizecontroller.ui.screen.FontSizeScreen
+import com.example.fontsizecontroller.ui.screen.OnboardingScreen
+import com.example.fontsizecontroller.ui.screen.PermissionScreen
+import com.example.fontsizecontroller.ui.screen.ResultScreen
 import com.example.fontsizecontroller.ui.theme.FontSizeControllerTheme
-
-private const val TAG = "FontSizeTest"
+import com.example.fontsizecontroller.viewmodel.FontSizeViewModel
 
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
 
-        enableEdgeToEdge()
-        setContent {
-            FontSizeControllerTheme {
-                var showPoc by remember { mutableStateOf(true) }
+    private val repository: SystemFontSettingsRepository by lazy {
+        SystemFontSettingsRepositoryImpl(applicationContext)
+    }
 
-                if (showPoc) {
-                    PocScreen(
-                        onNavigateBack = { showPoc = false }
-                    )
-                } else {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        FontSizeDemoScreen()
-                        Button(
-                            onClick = { showPoc = true },
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(24.dp)
-                        ) {
-                            Text("Mở POC Screen")
-                        }
-                    }
-                }
+    private val viewModel: FontSizeViewModel by viewModels {
+        object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return FontSizeViewModel(repository) as T
             }
         }
     }
-}
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun FontSizeDemoScreen() {
-    // State: lưu option đang được chọn, mặc định là "Normal"
-    var selected by remember { mutableStateOf(getDefaultFontOption()) }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Font Size Controller") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            )
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp)
-        ) {
+        setContent {
+            val uiState by viewModel.uiState.collectAsState()
 
-            // ── Phần preview chữ theo scale đang chọn ────────────────
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                )
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Xin chào! Đây là cỡ chữ mẫu.",
-                        fontSize = (16 * selected.scale).sp,
-                        fontWeight = FontWeight.Normal
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Scale: ${selected.scale}x  |  ${selected.label}",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                    )
-                    if (isLargeFont(selected.scale)) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "⚡ Cỡ chữ lớn",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.tertiary,
-                            fontWeight = FontWeight.Bold
+            FontSizeControllerTheme(darkTheme = uiState.isDarkMode) {
+                when (uiState.currentScreen) {
+                    ScreenDestination.ONBOARDING -> {
+                        OnboardingScreen(
+                            language = uiState.language,
+                            onStartClick = { viewModel.navigateTo(ScreenDestination.MAIN_FONT) },
+                            onToggleLanguage = { viewModel.toggleLanguage() }
+                        )
+                    }
+
+                    ScreenDestination.MAIN_FONT -> {
+                        FontSizeScreen(
+                            uiState = uiState,
+                            onSelectOption = { viewModel.selectOption(it) },
+                            onApply = { viewModel.applySelectedScale() },
+                            onBackClick = { viewModel.navigateTo(ScreenDestination.ONBOARDING) },
+                            onToggleLanguage = { viewModel.toggleLanguage() },
+                            onToggleDarkMode = { viewModel.toggleDarkMode() }
+                        )
+                    }
+
+                    ScreenDestination.PERMISSION -> {
+                        PermissionScreen(
+                            language = uiState.language,
+                            onOpenSettings = { openManageWriteSettings(this@MainActivity) },
+                            onDismiss = { viewModel.navigateTo(ScreenDestination.MAIN_FONT) },
+                            onToggleLanguage = { viewModel.toggleLanguage() }
+                        )
+                    }
+
+                    ScreenDestination.RESULT -> {
+                        val currentScale = uiState.currentScale ?: 1.0f
+                        val label = uiState.currentLabel
+                        ResultScreen(
+                            scale = currentScale,
+                            label = label,
+                            language = uiState.language,
+                            onBackHome = { viewModel.navigateTo(ScreenDestination.MAIN_FONT) },
+                            onTryAnother = { viewModel.navigateTo(ScreenDestination.MAIN_FONT) },
+                            onToggleLanguage = { viewModel.toggleLanguage() }
                         )
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Text(
-                text = "Chọn cỡ chữ:",
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 16.sp
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // ── Danh sách 4 options ───────────────────────────────────
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                items(fontSizeOptions) { option ->
-                    FontSizeCard(
-                        option = option,
-                        isSelected = option.label == selected.label,
-                        onClick = {
-                            selected = option
-                            Log.d(TAG, "Selected: $option | isLarge: ${isLargeFont(option.scale)}")
-                        }
-                    )
-                }
-            }
         }
     }
-}
 
-@Composable
-fun FontSizeCard(
-    option: FontSizeOption,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    val containerColor = if (isSelected)
-        MaterialTheme.colorScheme.primary
-    else
-        MaterialTheme.colorScheme.surface
+    override fun onResume() {
+        super.onResume()
+        // Khi người dùng cấp quyền từ Cài đặt hệ thống và quay lại ứng dụng
+        viewModel.loadCurrentSettings()
+    }
 
-    val contentColor = if (isSelected)
-        MaterialTheme.colorScheme.onPrimary
-    else
-        MaterialTheme.colorScheme.onSurface
-
-    Card(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = containerColor,
-            contentColor = contentColor
-        ),
-        border = if (!isSelected) BorderStroke(1.dp, MaterialTheme.colorScheme.outline) else null,
-        elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 4.dp else 1.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(
-                    text = option.label,
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                    fontSize = 16.sp
-                )
-                Text(
-                    text = "scale = ${option.scale}",
-                    fontSize = 12.sp,
-                    color = contentColor.copy(alpha = 0.7f)
-                )
+    private fun openManageWriteSettings(context: Context) {
+        try {
+            val intent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
+                data = Uri.parse("package:${context.packageName}")
             }
-            if (isSelected) {
-                Text(text = "✓", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            context.startActivity(intent)
+        } catch (_: Exception) {
+            // Fallback nếu máy không mở trực tiếp được package URI
+            try {
+                context.startActivity(Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS))
+            } catch (_: Exception) {
+                context.startActivity(Intent(Settings.ACTION_SETTINGS))
             }
         }
     }

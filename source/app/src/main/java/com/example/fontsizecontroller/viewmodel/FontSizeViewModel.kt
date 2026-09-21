@@ -2,11 +2,13 @@ package com.example.fontsizecontroller.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.fontsizecontroller.model.AppLanguage
+import com.example.fontsizecontroller.model.ApplyUiResult
 import com.example.fontsizecontroller.model.FontSizeOption
-import com.example.fontsizecontroller.model.FontSizeStatus
 import com.example.fontsizecontroller.model.FontSizeUiState
-import com.example.fontsizecontroller.model.FontScaleResult
-import com.example.fontsizecontroller.repository.FontSettingsRepository
+import com.example.fontsizecontroller.model.FontScaleApplyResult
+import com.example.fontsizecontroller.model.ScreenDestination
+import com.example.fontsizecontroller.repository.SystemFontSettingsRepository
 import com.example.fontsizecontroller.util.FontScaleMapper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,10 +17,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * ViewModel điều phối StateFlow và các hành động người dùng cho màn hình quản lý cỡ chữ.
+ * ViewModel điều phối StateFlow và các hành động người dùng cho ứng dụng FontMaster.
+ * Tuân thủ UDF: UI chỉ bắn events, ViewModel xử lý logic và phát ra immutable State.
  */
 class FontSizeViewModel(
-    private val repository: FontSettingsRepository
+    private val repository: SystemFontSettingsRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FontSizeUiState())
@@ -29,64 +32,141 @@ class FontSizeViewModel(
     }
 
     /**
-     * Tải cấu hình cỡ chữ hiện tại và kiểm tra capability quyền.
+     * Tải cấu hình cỡ chữ hiện tại và kiểm tra capability quyền WRITE_SETTINGS.
      */
     fun loadCurrentSettings() {
-        val scale = repository.getCurrentFontScale()
-        val canWrite = repository.canWriteSettings()
-        val mappedOption = FontScaleMapper.mapScaleToOption(scale)
+        _uiState.update { it.copy(isLoading = true) }
 
+        val scaleResult = repository.readFontScale()
+        val canWrite = repository.canWriteSettings()
+
+        scaleResult.fold(
+            onSuccess = { scale ->
+                val label = FontScaleMapper.toDisplayLabel(scale)
+                val mappedOption = FontScaleMapper.mapScaleToOption(scale)
+                _uiState.update { current ->
+                    current.copy(
+                        isLoading = false,
+                        currentScale = scale,
+                        currentLabel = label,
+                        selectedOption = current.selectedOption ?: mappedOption,
+                        canWriteSettings = canWrite,
+                        result = ApplyUiResult.Idle
+                    )
+                }
+            },
+            onFailure = { error ->
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        canWriteSettings = canWrite,
+                        result = ApplyUiResult.Error(error.message ?: "Không đọc được cài đặt font")
+                    )
+                }
+            }
+        )
+    }
+
+    /**
+     * Người dùng chọn một preset (chỉ cập nhật State in-memory và thẻ Preview, KHÔNG ghi vào hệ thống).
+     */
+    fun selectOption(option: FontSizeOption) {
         _uiState.update {
             it.copy(
-                isLoading = false,
-                currentScale = scale,
-                selectedOption = it.selectedOption ?: mappedOption,
-                canWriteSettings = canWrite,
-                status = FontSizeStatus.Idle
+                selectedOption = option,
+                result = ApplyUiResult.Idle
             )
         }
     }
 
     /**
-     * Người dùng chọn một preset (chỉ cập nhật State in-memory và Preview, không ghi hệ thống).
-     */
-    fun selectOption(option: FontSizeOption) {
-        _uiState.update { it.copy(selectedOption = option) }
-    }
-
-    /**
-     * Bắt đầu quy trình ghi cỡ chữ vào hệ thống và cập nhật kết quả.
+     * Bắt đầu quy trình ghi cỡ chữ vào hệ thống Android và xác thực lại (read-back verify).
      */
     fun applySelectedScale() {
-        val target = _uiState.value.selectedOption ?: return
+        val option = _uiState.value.selectedOption ?: return
+
+        // Nếu chưa có quyền, mở ngay màn hình giải thích cấp quyền
+        if (!_uiState.value.canWriteSettings) {
+            _uiState.update {
+                it.copy(
+                    result = ApplyUiResult.PermissionRequired,
+                    currentScreen = ScreenDestination.PERMISSION
+                )
+            }
+            return
+        }
+
         viewModelScope.launch {
             _uiState.update { it.copy(isApplying = true) }
-            val result = repository.applyFontScale(target.scale)
-            _uiState.update {
-                when (result) {
-                    is FontScaleResult.Success -> it.copy(
-                        isApplying = false,
-                        currentScale = result.scale,
-                        status = FontSizeStatus.Success,
-                        message = "Đã áp dụng cỡ chữ thành công"
-                    )
-                    is FontScaleResult.PermissionRequired -> it.copy(
-                        isApplying = false,
-                        status = FontSizeStatus.PermissionRequired,
-                        message = "Cần cấp quyền WRITE_SETTINGS để thay đổi cài đặt hệ thống"
-                    )
-                    is FontScaleResult.Error -> it.copy(
-                        isApplying = false,
-                        status = FontSizeStatus.Error,
-                        message = result.message
-                    )
-                    is FontScaleResult.Unsupported -> it.copy(
-                        isApplying = false,
-                        status = FontSizeStatus.Unsupported,
-                        message = "Thiết bị không hỗ trợ ghi trực tiếp FONT_SCALE"
-                    )
+
+            when (val result = repository.applyFontScale(option.scale)) {
+                is FontScaleApplyResult.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            isApplying = false,
+                            currentScale = result.verifiedScale,
+                            currentLabel = option.label,
+                            result = ApplyUiResult.Success(result.verifiedScale, option.label),
+                            currentScreen = ScreenDestination.RESULT
+                        )
+                    }
+                }
+
+                FontScaleApplyResult.PermissionRequired -> {
+                    _uiState.update {
+                        it.copy(
+                            isApplying = false,
+                            canWriteSettings = false,
+                            result = ApplyUiResult.PermissionRequired,
+                            currentScreen = ScreenDestination.PERMISSION
+                        )
+                    }
+                }
+
+                FontScaleApplyResult.Unsupported -> {
+                    _uiState.update {
+                        it.copy(
+                            isApplying = false,
+                            result = ApplyUiResult.Unsupported
+                        )
+                    }
+                }
+
+                is FontScaleApplyResult.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            isApplying = false,
+                            result = ApplyUiResult.Error(result.throwable?.message ?: "Lỗi ghi hệ thống")
+                        )
+                    }
                 }
             }
         }
+    }
+
+    /**
+     * Chuyển đổi ngôn ngữ hiển thị (VI <-> EN).
+     */
+    fun toggleLanguage() {
+        val next = if (_uiState.value.language == AppLanguage.VI) {
+            AppLanguage.EN
+        } else {
+            AppLanguage.VI
+        }
+        _uiState.update { it.copy(language = next) }
+    }
+
+    /**
+     * Chuyển đổi chế độ sáng / tối (Dark mode).
+     */
+    fun toggleDarkMode() {
+        _uiState.update { it.copy(isDarkMode = !it.isDarkMode) }
+    }
+
+    /**
+     * Điều hướng màn hình trong ứng dụng.
+     */
+    fun navigateTo(destination: ScreenDestination) {
+        _uiState.update { it.copy(currentScreen = destination) }
     }
 }

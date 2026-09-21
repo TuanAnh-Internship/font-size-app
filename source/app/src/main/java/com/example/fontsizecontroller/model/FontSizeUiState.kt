@@ -3,23 +3,36 @@ package com.example.fontsizecontroller.model
 /**
  * Trạng thái kết quả của thao tác thay đổi cỡ chữ.
  */
-enum class FontSizeStatus {
-    Idle,
-    PermissionRequired,
-    Success,
-    Error,
-    Unsupported
+sealed interface ApplyUiResult {
+    data object Idle : ApplyUiResult
+    data object PermissionRequired : ApplyUiResult
+    data class Success(val scale: Float, val label: String) : ApplyUiResult
+    data class Error(val message: String? = null) : ApplyUiResult
+    data object Unsupported : ApplyUiResult
 }
 
 /**
- * UI State toàn diện cho màn hình quản lý cỡ chữ.
+ * Các màn hình trong luồng điều hướng của ứng dụng FontMaster.
+ */
+enum class ScreenDestination {
+    ONBOARDING,
+    MAIN_FONT,
+    PERMISSION,
+    RESULT
+}
+
+/**
+ * UI State toàn diện cho toàn bộ luồng ứng dụng theo chuẩn UDF (Unidirectional Data Flow).
  */
 data class FontSizeUiState(
     val isLoading: Boolean = true,
     val currentScale: Float? = null,
+    val currentLabel: String = "",
     val selectedOption: FontSizeOption? = null,
     val canWriteSettings: Boolean = false,
     val isApplying: Boolean = false,
-    val status: FontSizeStatus = FontSizeStatus.Idle,
-    val message: String? = null
+    val result: ApplyUiResult = ApplyUiResult.Idle,
+    val language: AppLanguage = AppLanguage.VI,
+    val isDarkMode: Boolean = false,
+    val currentScreen: ScreenDestination = ScreenDestination.MAIN_FONT
 )

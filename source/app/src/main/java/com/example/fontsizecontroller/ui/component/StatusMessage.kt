@@ -9,21 +9,28 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.fontsizecontroller.model.FontSizeStatus
+import com.example.fontsizecontroller.model.ApplyUiResult
 
 @Composable
 fun StatusMessage(
-    status: FontSizeStatus,
-    message: String?,
+    result: ApplyUiResult,
     modifier: Modifier = Modifier
 ) {
-    if (message.isNullOrBlank() && status == FontSizeStatus.Idle) return
+    if (result is ApplyUiResult.Idle) return
 
-    val containerColor = when (status) {
-        FontSizeStatus.Success -> MaterialTheme.colorScheme.primaryContainer
-        FontSizeStatus.Error, FontSizeStatus.Unsupported -> MaterialTheme.colorScheme.errorContainer
-        FontSizeStatus.PermissionRequired -> MaterialTheme.colorScheme.tertiaryContainer
-        FontSizeStatus.Idle -> MaterialTheme.colorScheme.surfaceVariant
+    val containerColor = when (result) {
+        is ApplyUiResult.Success -> MaterialTheme.colorScheme.primaryContainer
+        is ApplyUiResult.Error, ApplyUiResult.Unsupported -> MaterialTheme.colorScheme.errorContainer
+        ApplyUiResult.PermissionRequired -> MaterialTheme.colorScheme.tertiaryContainer
+        ApplyUiResult.Idle -> MaterialTheme.colorScheme.surfaceVariant
+    }
+
+    val message = when (result) {
+        is ApplyUiResult.Success -> "Đã áp dụng cỡ chữ thành công"
+        is ApplyUiResult.Error -> result.message ?: "Đã xảy ra lỗi"
+        ApplyUiResult.Unsupported -> "Hệ thống không hỗ trợ scale này"
+        ApplyUiResult.PermissionRequired -> "Cần cấp quyền WRITE_SETTINGS"
+        ApplyUiResult.Idle -> ""
     }
 
     Card(
@@ -31,7 +38,7 @@ fun StatusMessage(
         colors = CardDefaults.cardColors(containerColor = containerColor)
     ) {
         Text(
-            text = message ?: "",
+            text = message,
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(12.dp)
         )
