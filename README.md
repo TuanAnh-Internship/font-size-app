@@ -161,19 +161,26 @@ font-size-app/
 * **Android SDK:** Compile SDK 37, Min SDK 29 (Android 10+).
 * **Thiết bị kiểm thử:** Điện thoại Android thật (bật USB/Wireless Debugging) hoặc Android Emulator.
 
-### 2. Triển khai nhanh bằng 1 câu lệnh (Quick Deploy Script)
-Dự án được tích hợp sẵn script PowerShell thông minh tự động phát hiện thiết bị đang kết nối qua ADB:
+### 2. Hướng dẫn chạy & Kiểm thử (Testing & Build)
+* **Chạy kiểm thử tự động (Unit Tests):**
+  ```powershell
+  cd font-size-app\source
+  ./gradlew testDebugUnitTest
+  ```
+  *(Bộ test tự động `FontScaleMapperTest` bao phủ toàn bộ Test Matrix: 0.85x, 1.00x, 1.15x, 1.30x và các trường hợp lẻ dung sai 0.03f).*
 
-1. Mở PowerShell tại thư mục `source`:
-   ```powershell
-   cd font-size-app\source
-   ```
-2. Chạy lệnh deploy:
-   ```powershell
-   Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force; .\deploy.ps1
-   ```
-   *Script sẽ tự động: Biên dịch APK $\rightarrow$ Cài đặt lên điện thoại $\rightarrow$ Mở ứng dụng lên màn hình $\rightarrow$ In logcat kiểm tra.*
+* **Biên dịch xuất file APK (Debug Build):**
+  ```powershell
+  ./gradlew assembleDebug
+  ```
+  File APK sẵn sàng để chia sẻ cài đặt trực tiếp lên các máy Android khác tại:
+  `font-size-app/source/app/build/outputs/apk/debug/app-debug.apk`
 
+* **Cài đặt nhanh lên thiết bị đang kết nối ADB:**
+  ```powershell
+  adb install -r app/build/outputs/apk/debug/app-debug.apk
+  adb shell am start -n com.example.fontsizecontroller/.MainActivity
+  ```
 ---
 
 ## 📖 Tài liệu tham khảo kỹ thuật
