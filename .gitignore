@@ -11,4 +11,6 @@ source/local.properties
 .DS_Store
 captures/
 .externalNativeBuild
-.cxx
+# Private & Security Docs
+docs/private_*.md
+docs/ai_*.md
