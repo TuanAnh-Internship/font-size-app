@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">FontSizeController</string>
+    <string name="app_name">FontM</string>
+    <string name="app_full_name">FontM - Thay đổi phông chữ , kích cỡ</string>
 </resources>
