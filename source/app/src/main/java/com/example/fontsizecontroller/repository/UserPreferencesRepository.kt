@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.fontsizecontroller.model.AppLanguage
 import com.example.fontsizecontroller.model.ReadingMode
@@ -23,7 +24,10 @@ data class UserPreferences(
     val isDarkMode: Boolean = false,
     val readingMode: ReadingMode = ReadingMode.STANDARD,
     val isBoldPreview: Boolean = false,
-    val lastAppliedScale: Float? = null
+    val lastAppliedScale: Float? = null,
+    val eyeTestDone: Boolean = false,
+    val eyeTestResultScale: Float = 1.0f,
+    val eyeTestResultStep: Int = 3
 )
 
 interface UserPreferencesRepository {
@@ -33,6 +37,7 @@ interface UserPreferencesRepository {
     suspend fun setReadingMode(mode: ReadingMode)
     suspend fun setBoldPreview(isBold: Boolean)
     suspend fun setLastAppliedScale(scale: Float)
+    suspend fun setEyeTestResult(done: Boolean, scale: Float, step: Int)
 }
 
 class UserPreferencesRepositoryImpl(
@@ -45,6 +50,9 @@ class UserPreferencesRepositoryImpl(
         val KEY_READING_MODE = stringPreferencesKey("key_reading_mode")
         val KEY_BOLD_PREVIEW = booleanPreferencesKey("key_bold_preview")
         val KEY_LAST_APPLIED_SCALE = floatPreferencesKey("key_last_applied_scale")
+        val KEY_EYE_TEST_DONE = booleanPreferencesKey("key_eye_test_done")
+        val KEY_EYE_TEST_SCALE = floatPreferencesKey("key_eye_test_scale")
+        val KEY_EYE_TEST_STEP = intPreferencesKey("key_eye_test_step")
     }
 
     override val userPreferencesFlow: Flow<UserPreferences> = context.userDataStore.data
@@ -74,13 +82,19 @@ class UserPreferencesRepositoryImpl(
 
             val isBold = preferences[PreferencesKeys.KEY_BOLD_PREVIEW] ?: false
             val lastScale = preferences[PreferencesKeys.KEY_LAST_APPLIED_SCALE]
+            val eyeTestDone = preferences[PreferencesKeys.KEY_EYE_TEST_DONE] ?: false
+            val eyeTestScale = preferences[PreferencesKeys.KEY_EYE_TEST_SCALE] ?: 1.0f
+            val eyeTestStep = preferences[PreferencesKeys.KEY_EYE_TEST_STEP] ?: 3
 
             UserPreferences(
                 language = language,
                 isDarkMode = isDarkMode,
                 readingMode = readingMode,
                 isBoldPreview = isBold,
-                lastAppliedScale = lastScale
+                lastAppliedScale = lastScale,
+                eyeTestDone = eyeTestDone,
+                eyeTestResultScale = eyeTestScale,
+                eyeTestResultStep = eyeTestStep
             )
         }
 
@@ -111,6 +125,14 @@ class UserPreferencesRepositoryImpl(
     override suspend fun setLastAppliedScale(scale: Float) {
         context.userDataStore.edit { preferences ->
             preferences[PreferencesKeys.KEY_LAST_APPLIED_SCALE] = scale
+        }
+    }
+
+    override suspend fun setEyeTestResult(done: Boolean, scale: Float, step: Int) {
+        context.userDataStore.edit { preferences ->
+            preferences[PreferencesKeys.KEY_EYE_TEST_DONE] = done
+            preferences[PreferencesKeys.KEY_EYE_TEST_SCALE] = scale
+            preferences[PreferencesKeys.KEY_EYE_TEST_STEP] = step
         }
     }
 }

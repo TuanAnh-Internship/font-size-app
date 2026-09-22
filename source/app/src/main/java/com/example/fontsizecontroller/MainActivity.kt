@@ -105,6 +105,7 @@ class MainActivity : ComponentActivity() {
                     ScreenDestination.FONT_GALLERY -> {
                         FontGalleryScreen(
                             uiState = uiState,
+                            onApplyScale = { viewModel.selectAndApplyOption(it) },
                             onBackClick = { viewModel.selectTab(0) },
                             onToggleLanguage = { viewModel.toggleLanguage() },
                             onToggleDarkMode = { viewModel.toggleDarkMode() },
@@ -118,6 +119,7 @@ class MainActivity : ComponentActivity() {
                             onReadingModeChange = { viewModel.setReadingMode(it) },
                             onToggleBold = { viewModel.toggleBoldPreview() },
                             onSelectScale = { viewModel.selectOption(it) },
+                            onApplyScale = { viewModel.applySelectedScale() },
                             onBackClick = { viewModel.selectTab(0) },
                             onToggleLanguage = { viewModel.toggleLanguage() },
                             onToggleDarkMode = { viewModel.toggleDarkMode() },

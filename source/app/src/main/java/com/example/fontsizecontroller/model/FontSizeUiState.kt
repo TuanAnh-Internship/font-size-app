@@ -41,5 +41,7 @@ data class FontSizeUiState(
     val selectedTab: Int = 0,
     val readingMode: ReadingMode = ReadingMode.STANDARD,
     val isBoldPreview: Boolean = false,
-    val showOemFallbackDialog: Boolean = false
+    val showOemFallbackDialog: Boolean = false,
+    val eyeTestDone: Boolean = false,
+    val eyeTestResultScale: Float = 1.0f
 )

@@ -48,7 +48,9 @@ class FontSizeViewModel(
                         language = userPref.language,
                         isDarkMode = userPref.isDarkMode,
                         readingMode = userPref.readingMode,
-                        isBoldPreview = userPref.isBoldPreview
+                        isBoldPreview = userPref.isBoldPreview,
+                        eyeTestDone = userPref.eyeTestDone,
+                        eyeTestResultScale = userPref.eyeTestResultScale
                     )
                 }
             }
@@ -244,17 +246,36 @@ class FontSizeViewModel(
     }
 
     /**
-     * Áp dụng cỡ chữ được đề xuất từ Bài kiểm tra thị lực thông minh.
+     * Áp dụng cỡ chữ được đề xuất từ Bài kiểm tra thị lực thông minh và kích hoạt ghi hệ thống ngay.
+     * Đồng thời lưu kết quả đo thị lực vào DataStore để không bắt người dùng đo lại mỗi lần mở app.
      */
-    fun applyRecommendedScale(scale: Float, label: String) {
+    fun applyRecommendedScale(scale: Float, label: String, step: Int = 3) {
         val option = FontSizeOption(label = label, scale = scale)
         _uiState.update {
             it.copy(
                 selectedOption = option,
                 selectedTab = 0,
-                currentScreen = ScreenDestination.MAIN_FONT
+                eyeTestDone = true,
+                eyeTestResultScale = scale
             )
         }
+        applySelectedScale()
+        viewModelScope.launch {
+            preferencesRepository?.setEyeTestResult(done = true, scale = scale, step = step)
+        }
+    }
+
+    /**
+     * Chọn và áp dụng cỡ chữ từ Thư viện Kiểu chữ hoặc Màn hình Trợ năng.
+     */
+    fun selectAndApplyOption(option: FontSizeOption) {
+        _uiState.update {
+            it.copy(
+                selectedOption = option,
+                selectedTab = 0
+            )
+        }
+        applySelectedScale()
     }
 
     /**
