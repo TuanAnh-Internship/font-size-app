@@ -7,8 +7,10 @@ import com.example.fontsizecontroller.model.ApplyUiResult
 import com.example.fontsizecontroller.model.FontSizeOption
 import com.example.fontsizecontroller.model.FontSizeUiState
 import com.example.fontsizecontroller.model.FontScaleApplyResult
+import com.example.fontsizecontroller.model.ReadingMode
 import com.example.fontsizecontroller.model.ScreenDestination
 import com.example.fontsizecontroller.repository.SystemFontSettingsRepository
+import com.example.fontsizecontroller.repository.UserPreferencesRepository
 import com.example.fontsizecontroller.util.FontScaleMapper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,11 +19,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * ViewModel điều phối StateFlow và các hành động người dùng cho ứng dụng FontMaster.
- * Tuân thủ UDF: UI chỉ bắn events, ViewModel xử lý logic và phát ra immutable State.
+ * ViewModel điều phối StateFlow và các hành động người dùng cho ứng dụng FontM.
+ * Tuân thủ UDF: UI chỉ phát sự kiện (events), ViewModel điều phối logic và phát ra immutable State.
+ * Tích hợp DataStore lưu trữ bền vững các cài đặt người dùng.
  */
 class FontSizeViewModel(
-    private val repository: SystemFontSettingsRepository
+    private val repository: SystemFontSettingsRepository,
+    private val preferencesRepository: UserPreferencesRepository? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FontSizeUiState())
@@ -29,10 +33,30 @@ class FontSizeViewModel(
 
     init {
         loadCurrentSettings()
+        observePreferences()
     }
 
     /**
-     * Tải cấu hình cỡ chữ hiện tại và kiểm tra capability quyền WRITE_SETTINGS.
+     * Lắng nghe và khôi phục các thiết lập cá nhân hóa từ DataStore.
+     */
+    private fun observePreferences() {
+        val prefs = preferencesRepository ?: return
+        viewModelScope.launch {
+            prefs.userPreferencesFlow.collect { userPref ->
+                _uiState.update { current ->
+                    current.copy(
+                        language = userPref.language,
+                        isDarkMode = userPref.isDarkMode,
+                        readingMode = userPref.readingMode,
+                        isBoldPreview = userPref.isBoldPreview
+                    )
+                }
+            }
+        }
+    }
+
+    /**
+     * Tải cấu hình cỡ chữ hiện tại từ Android Framework và kiểm tra quyền WRITE_SETTINGS.
      */
     fun loadCurrentSettings() {
         _uiState.update { it.copy(isLoading = true) }
@@ -68,7 +92,7 @@ class FontSizeViewModel(
     }
 
     /**
-     * Người dùng chọn một preset (chỉ cập nhật State in-memory và thẻ Preview, KHÔNG ghi vào hệ thống).
+     * Người dùng chọn một preset hoặc kéo thanh trượt (chỉ đổi State in-memory và thẻ Preview).
      */
     fun selectOption(option: FontSizeOption) {
         _uiState.update {
@@ -85,7 +109,7 @@ class FontSizeViewModel(
     fun applySelectedScale() {
         val option = _uiState.value.selectedOption ?: return
 
-        // Nếu chưa có quyền, mở ngay màn hình giải thích cấp quyền
+        // Nếu chưa có quyền, mở ngay màn hình hướng dẫn cấp quyền
         if (!_uiState.value.canWriteSettings) {
             _uiState.update {
                 it.copy(
@@ -110,6 +134,7 @@ class FontSizeViewModel(
                             currentScreen = ScreenDestination.RESULT
                         )
                     }
+                    preferencesRepository?.setLastAppliedScale(result.verifiedScale)
                 }
 
                 FontScaleApplyResult.PermissionRequired -> {
@@ -127,7 +152,8 @@ class FontSizeViewModel(
                     _uiState.update {
                         it.copy(
                             isApplying = false,
-                            result = ApplyUiResult.Unsupported
+                            result = ApplyUiResult.Unsupported,
+                            showOemFallbackDialog = true
                         )
                     }
                 }
@@ -145,7 +171,7 @@ class FontSizeViewModel(
     }
 
     /**
-     * Chuyển đổi ngôn ngữ hiển thị (VI <-> EN).
+     * Chuyển đổi ngôn ngữ hiển thị (VI <-> EN) và lưu vào DataStore.
      */
     fun toggleLanguage() {
         val next = if (_uiState.value.language == AppLanguage.VI) {
@@ -154,13 +180,48 @@ class FontSizeViewModel(
             AppLanguage.VI
         }
         _uiState.update { it.copy(language = next) }
+        viewModelScope.launch {
+            preferencesRepository?.setLanguage(next)
+        }
     }
 
     /**
-     * Chuyển đổi chế độ sáng / tối (Dark mode).
+     * Chuyển đổi chế độ sáng / tối (Dark mode) và lưu vào DataStore.
      */
     fun toggleDarkMode() {
-        _uiState.update { it.copy(isDarkMode = !it.isDarkMode) }
+        val next = !_uiState.value.isDarkMode
+        _uiState.update { it.copy(isDarkMode = next) }
+        viewModelScope.launch {
+            preferencesRepository?.setDarkMode(next)
+        }
+    }
+
+    /**
+     * Thiết lập chế độ đọc bảo vệ thị lực (Chuẩn / Sepia / Tương phản cao) và lưu vào DataStore.
+     */
+    fun setReadingMode(mode: ReadingMode) {
+        _uiState.update { it.copy(readingMode = mode) }
+        viewModelScope.launch {
+            preferencesRepository?.setReadingMode(mode)
+        }
+    }
+
+    /**
+     * Bật/tắt mô phỏng chữ đậm (Bold text) và lưu vào DataStore.
+     */
+    fun toggleBoldPreview() {
+        val next = !_uiState.value.isBoldPreview
+        _uiState.update { it.copy(isBoldPreview = next) }
+        viewModelScope.launch {
+            preferencesRepository?.setBoldPreview(next)
+        }
+    }
+
+    /**
+     * Đóng hộp thoại hướng dẫn OEM Fallback.
+     */
+    fun dismissOemFallbackDialog() {
+        _uiState.update { it.copy(showOemFallbackDialog = false) }
     }
 
     /**

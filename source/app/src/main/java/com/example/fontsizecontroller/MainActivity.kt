@@ -13,10 +13,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.fontsizecontroller.model.ApplyUiResult
 import com.example.fontsizecontroller.model.ScreenDestination
 import com.example.fontsizecontroller.repository.SystemFontSettingsRepository
 import com.example.fontsizecontroller.repository.SystemFontSettingsRepositoryImpl
+import com.example.fontsizecontroller.repository.UserPreferencesRepository
+import com.example.fontsizecontroller.repository.UserPreferencesRepositoryImpl
+import com.example.fontsizecontroller.ui.screen.AccessibilityScreen
 import com.example.fontsizecontroller.ui.screen.FontSizeScreen
 import com.example.fontsizecontroller.ui.screen.OnboardingScreen
 import com.example.fontsizecontroller.ui.screen.PermissionScreen
@@ -30,11 +32,15 @@ class MainActivity : ComponentActivity() {
         SystemFontSettingsRepositoryImpl(applicationContext)
     }
 
+    private val preferencesRepository: UserPreferencesRepository by lazy {
+        UserPreferencesRepositoryImpl(applicationContext)
+    }
+
     private val viewModel: FontSizeViewModel by viewModels {
         object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return FontSizeViewModel(repository) as T
+                return FontSizeViewModel(repository, preferencesRepository) as T
             }
         }
     }
@@ -62,6 +68,21 @@ class MainActivity : ComponentActivity() {
                             onSelectOption = { viewModel.selectOption(it) },
                             onApply = { viewModel.applySelectedScale() },
                             onBackClick = { viewModel.navigateTo(ScreenDestination.ONBOARDING) },
+                            onToggleLanguage = { viewModel.toggleLanguage() },
+                            onToggleDarkMode = { viewModel.toggleDarkMode() },
+                            onOpenAccessibility = { viewModel.navigateTo(ScreenDestination.ACCESSIBILITY) },
+                            onOpenDisplaySettings = { openDisplaySettings(this@MainActivity) },
+                            onDismissOemDialog = { viewModel.dismissOemFallbackDialog() }
+                        )
+                    }
+
+                    ScreenDestination.ACCESSIBILITY -> {
+                        AccessibilityScreen(
+                            uiState = uiState,
+                            onReadingModeChange = { viewModel.setReadingMode(it) },
+                            onToggleBold = { viewModel.toggleBoldPreview() },
+                            onSelectScale = { viewModel.selectOption(it) },
+                            onBackClick = { viewModel.navigateTo(ScreenDestination.MAIN_FONT) },
                             onToggleLanguage = { viewModel.toggleLanguage() },
                             onToggleDarkMode = { viewModel.toggleDarkMode() }
                         )
@@ -112,6 +133,17 @@ class MainActivity : ComponentActivity() {
             } catch (_: Exception) {
                 context.startActivity(Intent(Settings.ACTION_SETTINGS))
             }
+        }
+    }
+
+    private fun openDisplaySettings(context: Context) {
+        try {
+            val intent = Intent(Settings.ACTION_DISPLAY_SETTINGS)
+            context.startActivity(intent)
+        } catch (_: Exception) {
+            try {
+                context.startActivity(Intent(Settings.ACTION_SETTINGS))
+            } catch (_: Exception) {}
         }
     }
 }

@@ -18,7 +18,8 @@ enum class ScreenDestination {
     ONBOARDING,
     MAIN_FONT,
     PERMISSION,
-    RESULT
+    RESULT,
+    ACCESSIBILITY
 }
 
 /**
@@ -34,5 +35,8 @@ data class FontSizeUiState(
     val result: ApplyUiResult = ApplyUiResult.Idle,
     val language: AppLanguage = AppLanguage.VI,
     val isDarkMode: Boolean = false,
-    val currentScreen: ScreenDestination = ScreenDestination.MAIN_FONT
+    val currentScreen: ScreenDestination = ScreenDestination.MAIN_FONT,
+    val readingMode: ReadingMode = ReadingMode.STANDARD,
+    val isBoldPreview: Boolean = false,
+    val showOemFallbackDialog: Boolean = false
 )

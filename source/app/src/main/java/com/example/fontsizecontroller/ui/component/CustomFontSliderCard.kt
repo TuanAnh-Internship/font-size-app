@@ -27,6 +27,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,6 +50,7 @@ fun CustomFontSliderCard(
 ) {
     // Hỗ trợ tối đa lên đến 2.00x (200%) chuẩn Trợ Năng WCAG cho người lớn tuổi
     val safeScale = currentScale.coerceIn(0.80f, 2.00f)
+    val haptic = LocalHapticFeedback.current
 
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -124,6 +127,9 @@ fun CustomFontSliderCard(
                 value = safeScale,
                 onValueChange = { rawVal ->
                     val stepped = (rawVal * 20).roundToInt() / 20f
+                    if (Math.abs(stepped - safeScale) >= 0.04f) {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    }
                     val label = when {
                         Math.abs(stepped - 0.85f) < 0.01f -> "Small"
                         Math.abs(stepped - 1.00f) < 0.01f -> "Default"
