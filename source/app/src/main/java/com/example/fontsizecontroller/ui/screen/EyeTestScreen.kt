@@ -1,6 +1,9 @@
 package com.example.fontsizecontroller.ui.screen
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,13 +19,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.RemoveRedEye
-import androidx.compose.material.icons.outlined.RestartAlt
-import androidx.compose.material.icons.outlined.Speed
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -30,9 +32,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -49,7 +51,6 @@ import androidx.compose.ui.unit.sp
 import com.example.fontsizecontroller.model.AppLanguage
 import com.example.fontsizecontroller.model.FontSizeUiState
 import com.example.fontsizecontroller.ui.component.TopAppBarWithLanguage
-import com.example.fontsizecontroller.ui.theme.MintSuccess
 import com.example.fontsizecontroller.ui.theme.PurpleAccent
 
 @Composable
@@ -64,36 +65,39 @@ fun EyeTestScreen(
 ) {
     val scrollState = rememberScrollState()
 
-    // Quản lý trạng thái bài test
-    var currentStep by remember { mutableIntStateOf(0) } // 0: Start, 1: Test 1, 2: Test 2, 3: Test 3, 4: Result
-    var answer1 by remember { mutableStateOf<Int?>(null) } // 0: Dễ, 1: Hơi mờ, 2: Không đọc được
-    var answer2 by remember { mutableStateOf<Int?>(null) } // 0: Tốt, 1: Bình thường, 2: Cần to hơn
-    var answer3 by remember { mutableStateOf<Int?>(null) } // 0: Quá to, 1: Vừa vặn thoải mái, 2: Rất thích
+    // Nếu đã từng làm bài kiểm tra, mặc định hiển thị kết quả cũ
+    var showPreviousResult by remember(uiState.eyeTestDone) { mutableStateOf(uiState.eyeTestDone) }
 
-    // Tính toán kết quả đề xuất dựa trên câu trả lời
-    val recommendedScale = remember(answer1, answer2, answer3) {
-        val difficultyScore = (answer1 ?: 0) + (answer2 ?: 0)
-        when {
-            difficultyScore >= 3 -> 1.35f
-            difficultyScore >= 2 -> 1.25f
-            difficultyScore >= 1 -> 1.15f
-            else -> 1.00f
-        }
+    // Tiến trình: 1, 2, 3
+    var currentStep by remember { mutableIntStateOf(1) }
+    var selectedOptionIndex by remember { mutableIntStateOf(1) } // 0: Quá nhỏ, 1: Vừa vặn, 2: Hơi to
+
+    val sampleScale = when (currentStep) {
+        1 -> 1.00f
+        2 -> 1.15f
+        else -> 1.30f
     }
 
-    val recommendedLabel = remember(recommendedScale) {
-        when (recommendedScale) {
-            1.00f -> "Default (1.00x)"
-            1.15f -> "Large (1.15x)"
-            1.25f -> "Custom (1.25x)"
-            else -> "Extra Large (1.35x)"
-        }
+    val stepTitle = when (currentStep) {
+        1 -> if (uiState.language == AppLanguage.VI) "Bước 1 / 3 - Kiểm tra độ thoải mái" else "Step 1 / 3 - Reading Comfort"
+        2 -> if (uiState.language == AppLanguage.VI) "Bước 2 / 3 - Thử nghiệm phóng to nhẹ" else "Step 2 / 3 - Mild Magnification"
+        else -> if (uiState.language == AppLanguage.VI) "Bước 3 / 3 - Đánh giá cuối - Chọn để áp dụng" else "Step 3 / 3 - Final Evaluation - Choose to Apply"
     }
+
+    val progressPercent = (currentStep / 3f)
+
+    val recommendedScale = when {
+        selectedOptionIndex == 0 -> (sampleScale + 0.15f).coerceAtMost(1.50f)
+        selectedOptionIndex == 2 -> (sampleScale - 0.10f).coerceAtLeast(1.00f)
+        else -> sampleScale
+    }
+
+    val recommendedLabel = String.format(java.util.Locale.US, "Cỡ %.2fx", recommendedScale)
 
     Scaffold(
         topBar = {
             TopAppBarWithLanguage(
-                title = if (uiState.language == AppLanguage.VI) "Đo Thị Lực Thông Minh" else "Smart Eye Test",
+                title = if (uiState.language == AppLanguage.VI) "Kiểm Tra Thị Lực" else "Vision Eye Test",
                 language = uiState.language,
                 isDarkMode = uiState.isDarkMode,
                 onBackClick = onBackClick,
@@ -115,406 +119,390 @@ fun EyeTestScreen(
         ) {
             Spacer(modifier = Modifier.height(2.dp))
 
-            // Thanh tiến trình bài test
-            if (currentStep in 1..3) {
-                Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = if (uiState.language == AppLanguage.VI) "Câu hỏi $currentStep / 3" else "Question $currentStep / 3",
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = PurpleAccent
-                            )
-                        )
-                        Text(
-                            text = "${(currentStep * 33.3f).toInt()}%",
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(6.dp))
-                    LinearProgressIndicator(
-                        progress = { currentStep / 3f },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(8.dp)
-                            .clip(RoundedCornerShape(4.dp)),
-                        color = PurpleAccent,
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                }
-            }
-
-            when (currentStep) {
-                0 -> {
-                    // MÀN HÌNH BẮT ĐẦU
-                    Card(
-                        shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(20.dp))
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(24.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(64.dp)
-                                    .clip(RoundedCornerShape(18.dp))
-                                    .background(PurpleAccent.copy(alpha = 0.15f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.RemoveRedEye,
-                                    contentDescription = "Eye Test",
-                                    tint = PurpleAccent,
-                                    modifier = Modifier.size(36.dp)
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            Text(
-                                text = if (uiState.language == AppLanguage.VI) "Kiểm Tra Mắt Đọc Nhanh" else "Quick Reading Eye Test",
-                                style = MaterialTheme.typography.titleLarge.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            )
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            Text(
-                                text = if (uiState.language == AppLanguage.VI)
-                                    "Chỉ mất 30 giây với 3 câu hỏi đọc trực quan để tìm ra kích thước chữ hoàn hảo nhất cho thị lực của bạn, giúp loại bỏ mỏi mắt khi sử dụng điện thoại."
-                                else
-                                    "Takes just 30 seconds with 3 visual reading questions to discover the ideal font size for your eyes, eliminating eye fatigue on your phone.",
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    lineHeight = 22.sp
-                                ),
-                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                            )
-
-                            Spacer(modifier = Modifier.height(24.dp))
-
-                            Button(
-                                onClick = { currentStep = 1 },
-                                shape = RoundedCornerShape(16.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
-                                ),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(54.dp)
-                            ) {
-                                Text(
-                                    text = if (uiState.language == AppLanguage.VI) "Bắt Đầu Đo Ngay ➔" else "Start Test Now ➔",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp
-                                )
-                            }
-                        }
-                    }
-                }
-
-                1 -> {
-                    // CÂU HỎI 1: Cỡ chữ nhỏ 0.85x
-                    QuestionCard(
-                        stepTitle = if (uiState.language == AppLanguage.VI) "Bài đọc 1: Cỡ chữ nhỏ (0.85x)" else "Test 1: Small Font (0.85x)",
-                        sampleText = if (uiState.language == AppLanguage.VI)
-                            "Khoảng cách đọc điện thoại lý tưởng của mắt người là từ 30cm đến 40cm. Bạn có nhìn thấy đoạn văn bản này một cách dễ dàng không?"
-                        else
-                            "The ideal reading distance from screen to eyes is 30cm to 40cm. Can you read this passage with complete ease?",
-                        sampleScale = 0.85f,
-                        options = if (uiState.language == AppLanguage.VI)
-                            listOf("Đọc rất rõ ràng, thoải mái", "Hơi nhỏ, phải căng mắt", "Quá bé, mờ nhạt khó đọc")
-                        else
-                            listOf("Very clear and comfortable", "Slightly small, straining eyes", "Too small, blurry to read"),
-                        selectedOptionIndex = answer1,
-                        onOptionSelected = {
-                            answer1 = it
-                            currentStep = 2
-                        }
-                    )
-                }
-
-                2 -> {
-                    // CÂU HỎI 2: Cỡ chữ chuẩn 1.05x
-                    QuestionCard(
-                        stepTitle = if (uiState.language == AppLanguage.VI) "Bài đọc 2: Cỡ chữ tiêu chuẩn (1.05x)" else "Test 2: Standard Font (1.05x)",
-                        sampleText = if (uiState.language == AppLanguage.VI)
-                            "Công nghệ sinh ra là để phục vụ cuộc sống của con người, không phân biệt độ tuổi hay tình trạng thị lực."
-                        else
-                            "Technology is created to serve human life, regardless of age or vision capabilities.",
-                        sampleScale = 1.05f,
-                        options = if (uiState.language == AppLanguage.VI)
-                            listOf("Rất vừa vặn", "Đọc được nhưng muốn to hơn chút", "Vẫn còn hơi mỏi mắt")
-                        else
-                            listOf("Just right", "Readable but prefer larger", "Still causes eye fatigue"),
-                        selectedOptionIndex = answer2,
-                        onOptionSelected = {
-                            answer2 = it
-                            currentStep = 3
-                        }
-                    )
-                }
-
-                3 -> {
-                    // CÂU HỎI 3: Cỡ chữ lớn 1.25x
-                    QuestionCard(
-                        stepTitle = if (uiState.language == AppLanguage.VI) "Bài đọc 3: Cỡ chữ phóng to (1.25x)" else "Test 3: Magnified Font (1.25x)",
-                        sampleText = if (uiState.language == AppLanguage.VI)
-                            "Kích thước chữ lớn và đậm giúp não bộ nhận diện ký tự nhanh hơn 25%, giảm áp lực điều tiết của mắt."
-                        else
-                            "Magnified, clear text allows the brain to recognize characters 25% faster, significantly relieving eye strain.",
-                        sampleScale = 1.25f,
-                        options = if (uiState.language == AppLanguage.VI)
-                            listOf("Hơi to quá mức cần thiết", "Rất thích, cực kỳ dễ chịu và rõ nét", "Tuyệt vời, đây là mức tôi cần!")
-                        else
-                            listOf("Slightly too large", "Very pleasant and sharp", "Perfect, exactly what I need!"),
-                        selectedOptionIndex = answer3,
-                        onOptionSelected = {
-                            answer3 = it
-                            currentStep = 4
-                        }
-                    )
-                }
-
-                4 -> {
-                    // MÀN HÌNH KẾT QUẢ VÀ ĐỀ XUẤT
-                    Card(
-                        shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(20.dp))
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(24.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(64.dp)
-                                    .clip(RoundedCornerShape(18.dp))
-                                    .background(MintSuccess.copy(alpha = 0.15f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.CheckCircle,
-                                    contentDescription = "Result",
-                                    tint = MintSuccess,
-                                    modifier = Modifier.size(36.dp)
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            Text(
-                                text = if (uiState.language == AppLanguage.VI) "Kết Quả Đánh Giá Thị Lực" else "Vision Assessment Result",
-                                style = MaterialTheme.typography.titleLarge.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            )
-
-                            Spacer(modifier = Modifier.height(12.dp))
-
-                            // Thẻ đề xuất tỷ lệ phóng to
-                            Card(
-                                shape = RoundedCornerShape(16.dp),
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Column(
-                                    modifier = Modifier.padding(16.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Text(
-                                        text = if (uiState.language == AppLanguage.VI) "MỨC PHÓNG ĐẠI TỐI ƯU CHO MẮT BẠN" else "OPTIMAL MAGNIFICATION FOR YOUR EYES",
-                                        style = MaterialTheme.typography.labelSmall.copy(
-                                            fontWeight = FontWeight.Bold,
-                                            color = PurpleAccent
-                                        )
-                                    )
-                                    Spacer(modifier = Modifier.height(6.dp))
-                                    Text(
-                                        text = recommendedLabel,
-                                        style = MaterialTheme.typography.headlineMedium.copy(
-                                            fontWeight = FontWeight.ExtraBold,
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            Text(
-                                text = if (uiState.language == AppLanguage.VI)
-                                    "Dựa trên các câu trả lời, mắt của bạn có xu hướng mỏi khi đọc chữ nhỏ. Đặt cỡ chữ ở mức ${String.format(java.util.Locale.US, "%.2fx", recommendedScale)} sẽ giúp mắt thư giãn tối đa và không cần nheo mắt."
-                                else
-                                    "Based on your responses, your eyes strain on smaller text. Setting font scale to ${String.format(java.util.Locale.US, "%.2fx", recommendedScale)} will maximize eye relaxation.",
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    lineHeight = 22.sp
-                                ),
-                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                            )
-
-                            Spacer(modifier = Modifier.height(24.dp))
-
-                            // Nút áp dụng ngay cỡ chữ này
-                            Button(
-                                onClick = {
-                                    onApplyRecommendedScale(recommendedScale, recommendedLabel)
-                                },
-                                shape = RoundedCornerShape(16.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
-                                ),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(54.dp)
-                            ) {
-                                Text(
-                                    text = if (uiState.language == AppLanguage.VI) "Áp Dụng Cỡ Chữ Này Ngay ➔" else "Apply Recommended Size Now ➔",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 15.sp
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.height(12.dp))
-
-                            OutlinedButton(
-                                onClick = {
-                                    currentStep = 0
-                                    answer1 = null
-                                    answer2 = null
-                                    answer3 = null
-                                },
-                                shape = RoundedCornerShape(16.dp),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.RestartAlt,
-                                    contentDescription = "Restart",
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(text = if (uiState.language == AppLanguage.VI) "Đo Lại Từ Đầu" else "Retake Test")
-                            }
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-        }
-    }
-}
-
-@Composable
-private fun QuestionCard(
-    stepTitle: String,
-    sampleText: String,
-    sampleScale: Float,
-    options: List<String>,
-    selectedOptionIndex: Int?,
-    onOptionSelected: (Int) -> Unit
-) {
-    Card(
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(20.dp))
-    ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Text(
-                text = stepTitle,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Khung văn bản kiểm tra theo tỷ lệ mẫu
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .padding(16.dp)
-            ) {
-                Text(
-                    text = sampleText,
-                    fontSize = (16 * sampleScale).sp,
-                    lineHeight = (24 * sampleScale).sp,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "Bạn cảm thấy thế nào?",
-                style = MaterialTheme.typography.labelMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = PurpleAccent
-                )
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Danh sách các lựa chọn cảm nhận
-            options.forEachIndexed { index, optionText ->
-                val isSelected = selectedOptionIndex == index
+            // -- KẾT QUẢ ĐÃ LƯU (nếu đã đo xong) --
+            if (showPreviousResult && uiState.eyeTestDone) {
+                // Thẻ kết quả cũ
                 Card(
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = if (isSelected) PurpleAccent.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surface
+                        containerColor = PurpleAccent.copy(alpha = 0.1f)
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                        .border(
-                            width = if (isSelected) 2.dp else 1.dp,
-                            color = if (isSelected) PurpleAccent else MaterialTheme.colorScheme.outline,
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .clickable { onOptionSelected(index) }
+                        .border(1.5.dp, PurpleAccent.copy(alpha = 0.4f), RoundedCornerShape(20.dp))
                 ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Outlined.CheckCircle,
+                                contentDescription = "Done",
+                                tint = PurpleAccent,
+                                modifier = Modifier.size(22.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = if (uiState.language == AppLanguage.VI)
+                                    "ĐÃ HOÀN THÀNH KIỂM TRA"
+                                else "EYE TEST COMPLETED",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = PurpleAccent,
+                                letterSpacing = 0.5.sp
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Text(
+                            text = if (uiState.language == AppLanguage.VI)
+                                "Kết quả lần trước: Cỡ chữ ${
+                                    String.format(java.util.Locale.US, "%.2fx", uiState.eyeTestResultScale)
+                                } được áp dụng thành công."
+                            else
+                                "Previous result: Font scale ${
+                                    String.format(java.util.Locale.US, "%.2fx", uiState.eyeTestResultScale)
+                                } was successfully applied.",
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            lineHeight = 20.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        Text(
+                            text = if (uiState.language == AppLanguage.VI)
+                                "Cỡ chữ đã được lưu lại. Không cần đo lại trừ khi bạn muốn thay đổi."
+                            else
+                                "Your preference has been saved. No need to redo unless you want to change.",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        // Áp dụng lại cỡ chữ đã lưu
+                        Button(
+                            onClick = {
+                                onApplyRecommendedScale(
+                                    uiState.eyeTestResultScale,
+                                    String.format(java.util.Locale.US, "Cỡ %.2fx", uiState.eyeTestResultScale)
+                                )
+                            },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = PurpleAccent),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = if (uiState.language == AppLanguage.VI)
+                                    "Áp dụng lại cỡ chữ này"
+                                else "Re-apply This Font Size",
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        // Đo lại từ đầu
+                        TextButton(
+                            onClick = {
+                                showPreviousResult = false
+                                currentStep = 1
+                                selectedOptionIndex = 1
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Refresh,
+                                contentDescription = "Retake",
+                                modifier = Modifier.size(15.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = if (uiState.language == AppLanguage.VI)
+                                    "Đo lại từ đầu"
+                                else "Retake Test",
+                                fontSize = 13.sp
+                            )
+                        }
+                    }
+                }
+            } else {
+                // -- BÀI KIỂM TRA CHƯA LÀM / ĐANG LÀM --
+
+                // 1. THANH TIẾN ĐỘ
+                Column {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(14.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = optionText,
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                color = if (isSelected) PurpleAccent else MaterialTheme.colorScheme.onSurface
+                        Column {
+                            Text(
+                                text = if (uiState.language == AppLanguage.VI) "TIẾN ĐỘ" else "PROGRESS",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF06B6D4),
+                                letterSpacing = 0.5.sp
                             )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = stepTitle,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        Text(
+                            text = "${(progressPercent * 100).toInt()}%",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    LinearProgressIndicator(
+                        progress = { progressPercent },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(6.dp)
+                            .clip(RoundedCornerShape(3.dp)),
+                        color = Color(0xFF06B6D4),
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                }
+
+                // 2+3+4. THẺ LỚN CHỨA: Văn bản mẫu + Lựa chọn + Nút hành động
+                // → Gộp thành 1 Card để tất cả nằm gần nhau, không phải cuộn để tìm nút
+                Card(
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(20.dp))
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Header VĂN BẢN MẪU
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(22.dp)
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(PurpleAccent.copy(alpha = 0.15f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "A",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp,
+                                    color = PurpleAccent
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = if (uiState.language == AppLanguage.VI) "VĂN BẢN MẪU" else "SAMPLE TEXT",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = PurpleAccent,
+                                letterSpacing = 0.5.sp
+                            )
+                        }
+
+                        // Văn bản mẫu ngắn gọn (đủ để cảm nhận, không cuộn dài)
+                        Text(
+                            text = if (uiState.language == AppLanguage.VI)
+                                "Việc điều chỉnh kích thước chữ phù hợp giúp bảo vệ đôi mắt và tăng tốc độ đọc. Hãy đọc đoạn này tự nhiên và cho chúng tôi biết cảm nhận của bạn."
+                            else
+                                "Adjusting font size protects your eyes and improves reading speed. Read this text naturally and share your comfort level below.",
+                            fontSize = (15 * sampleScale).sp,
+                            lineHeight = (22 * sampleScale).sp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+
+                        // Đường kẻ ngăn cách
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(1.dp)
+                                .background(MaterialTheme.colorScheme.outlineVariant)
+                        )
+
+                        // CẢM NHẬN CỦA BẠN
+                        Text(
+                            text = if (uiState.language == AppLanguage.VI) "CẢM NHẬN CỦA BẠN" else "YOUR READING COMFORT",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = PurpleAccent,
+                            letterSpacing = 0.5.sp
+                        )
+
+                        val feelingOptions = if (uiState.language == AppLanguage.VI) {
+                            listOf("Chữ quá nhỏ, bị mỏi mắt", "Vừa vặn, đọc rất thoải mái", "Chữ hơi to quá")
+                        } else {
+                            listOf("Too small, straining eyes", "Just right, very comfortable", "Slightly too large")
+                        }
+
+                        feelingOptions.forEachIndexed { index, optionText ->
+                            val isSelected = selectedOptionIndex == index
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(
+                                        if (isSelected) PurpleAccent.copy(alpha = 0.10f)
+                                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                    )
+                                    .border(
+                                        width = if (isSelected) 1.5.dp else 0.dp,
+                                        color = if (isSelected) PurpleAccent else Color.Transparent,
+                                        shape = RoundedCornerShape(12.dp)
+                                    )
+                                    .clickable { selectedOptionIndex = index }
+                                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = optionText,
+                                    fontSize = 13.sp,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .size(18.dp)
+                                        .clip(CircleShape)
+                                        .border(
+                                            width = if (isSelected) 5.dp else 1.5.dp,
+                                            color = if (isSelected) PurpleAccent else MaterialTheme.colorScheme.outline,
+                                            shape = CircleShape
+                                        )
+                                )
+                            }
+                        }
+
+                        // NÚT SANG BƯỚC TIẾP / ÁP DỤNG — ngay dưới lựa chọn trong cùng card
+                        if (currentStep < 3) {
+                            Button(
+                                onClick = { currentStep += 1 },
+                                shape = RoundedCornerShape(14.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFF06B6D4),
+                                    contentColor = Color.White
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(50.dp)
+                            ) {
+                                Text(
+                                    text = if (uiState.language == AppLanguage.VI)
+                                        "Sang bước tiếp theo ➔ (${currentStep}/3)"
+                                    else "Next Step ➔ (${currentStep}/3)",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // NÚT ÁP DỤNG - chỉ hiện ở bước 3 (bước cuối)
+                AnimatedVisibility(
+                    visible = currentStep == 3,
+                    enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
+                    exit = fadeOut()
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        // Tóm tắt gợi ý
+                        Card(
+                            shape = RoundedCornerShape(14.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color(0xFF06B6D4).copy(alpha = 0.1f)
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .border(1.dp, Color(0xFF06B6D4).copy(alpha = 0.4f), RoundedCornerShape(14.dp))
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(14.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(Color(0xFF06B6D4).copy(alpha = 0.2f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "A",
+                                        fontWeight = FontWeight.ExtraBold,
+                                        fontSize = 16.sp,
+                                        color = Color(0xFF06B6D4)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column {
+                                    Text(
+                                        text = if (uiState.language == AppLanguage.VI)
+                                            "GỢI Ý TỐI ƯU"
+                                        else "RECOMMENDED",
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF06B6D4),
+                                        letterSpacing = 0.5.sp
+                                    )
+                                    Text(
+                                        text = if (uiState.language == AppLanguage.VI)
+                                            "Cỡ chữ $recommendedLabel phù hợp với cảm nhận của bạn"
+                                        else "Font scale $recommendedLabel matches your comfort level",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                        }
+
+                        // Nút áp dụng lớn
+                        Button(
+                            onClick = {
+                                onApplyRecommendedScale(recommendedScale, recommendedLabel)
+                            },
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = PurpleAccent,
+                                contentColor = Color.White
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(54.dp)
+                        ) {
+                            Text(
+                                text = "A",
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 16.sp
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = if (uiState.language == AppLanguage.VI)
+                                    "Áp dụng cỡ chữ phù hợp"
+                                else "Apply Suitable Font Size",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp
+                            )
+                        }
                     }
                 }
             }
+
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

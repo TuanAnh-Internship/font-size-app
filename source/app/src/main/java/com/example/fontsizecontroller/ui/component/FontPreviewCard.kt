@@ -113,9 +113,9 @@ fun FontPreviewCard(
                             ReadingMode.STANDARD ->
                                 if (language == AppLanguage.VI) "XEM TRƯỚC TRỰC QUAN" else "LIVE PREVIEW"
                             ReadingMode.SEPIA ->
-                                if (language == AppLanguage.VI) "CHẾ ĐỘ SÁCH GIẤY (SEPIA)" else "WARM SEPIA MODE"
+                                if (language == AppLanguage.VI) "CHẾ ĐỘ SÁCH VÀNG ẤM" else "WARM READING MODE"
                             ReadingMode.HIGH_CONTRAST ->
-                                if (language == AppLanguage.VI) "TƯƠNG PHẢN CAO (WCAG AAA)" else "HIGH CONTRAST MODE"
+                                if (language == AppLanguage.VI) "ĐỘ TƯƠNG PHẢN CAO" else "HIGH CONTRAST MODE"
                         },
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,

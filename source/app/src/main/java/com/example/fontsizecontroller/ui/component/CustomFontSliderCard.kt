@@ -95,7 +95,7 @@ fun CustomFontSliderCard(
                             )
                         )
                         Text(
-                            text = if (language == AppLanguage.VI) "Chuẩn Trợ Năng: 0.80x - 2.00x" else "Accessibility Range: 0.80x - 2.00x",
+                            text = if (language == AppLanguage.VI) "Tự do chỉnh từ 0.80x đến 2.00x" else "Custom range: 0.80x to 2.00x",
                             style = MaterialTheme.typography.bodySmall.copy(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 11.sp

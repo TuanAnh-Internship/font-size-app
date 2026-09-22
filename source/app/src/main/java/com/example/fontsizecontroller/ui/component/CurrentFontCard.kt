@@ -82,8 +82,15 @@ fun CurrentFontCard(
                         )
                     )
                     val scaleText = currentScale?.let { String.format(java.util.Locale.US, "%.2fx", it) } ?: "--"
+                    val displayLabel = when (currentLabel) {
+                        "Small" -> if (language == AppLanguage.VI) "Cỡ Nhỏ" else "Small"
+                        "Default" -> if (language == AppLanguage.VI) "Mặc Định" else "Default"
+                        "Large" -> if (language == AppLanguage.VI) "Cỡ Lớn" else "Large"
+                        "Extra Large" -> if (language == AppLanguage.VI) "Cỡ Rất Lớn" else "Extra Large"
+                        else -> currentLabel
+                    }
                     Text(
-                        text = "$scaleText ($currentLabel)",
+                        text = "$scaleText — $displayLabel",
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface

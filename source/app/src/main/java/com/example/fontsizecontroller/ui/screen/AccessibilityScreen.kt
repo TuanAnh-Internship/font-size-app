@@ -1,5 +1,6 @@
 package com.example.fontsizecontroller.ui.screen
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,15 +16,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Book
+import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.Contrast
-import androidx.compose.material.icons.outlined.FormatBold
-import androidx.compose.material.icons.outlined.Visibility
-import androidx.compose.material.icons.outlined.WbSunny
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.CompareArrows
+import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -31,15 +32,22 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,9 +55,9 @@ import com.example.fontsizecontroller.model.AppLanguage
 import com.example.fontsizecontroller.model.FontSizeOption
 import com.example.fontsizecontroller.model.FontSizeUiState
 import com.example.fontsizecontroller.model.ReadingMode
-import com.example.fontsizecontroller.ui.component.FontPreviewCard
 import com.example.fontsizecontroller.ui.component.TopAppBarWithLanguage
 import com.example.fontsizecontroller.ui.theme.PurpleAccent
+import kotlin.math.roundToInt
 
 @Composable
 fun AccessibilityScreen(
@@ -57,6 +65,7 @@ fun AccessibilityScreen(
     onReadingModeChange: (ReadingMode) -> Unit,
     onToggleBold: () -> Unit,
     onSelectScale: (FontSizeOption) -> Unit,
+    onApplyScale: () -> Unit = {},
     onBackClick: () -> Unit,
     onToggleLanguage: () -> Unit,
     onToggleDarkMode: () -> Unit,
@@ -65,10 +74,24 @@ fun AccessibilityScreen(
 ) {
     val scrollState = rememberScrollState()
 
+    // Trạng thái cục bộ phục vụ trải nghiệm mượt mà
+    var currentScaleSlider by remember(uiState.selectedOption, uiState.currentScale) {
+        mutableFloatStateOf(uiState.selectedOption?.scale ?: uiState.currentScale ?: 1.0f)
+    }
+
+    var isHighContrastActive by remember(uiState.readingMode) {
+        mutableStateOf(uiState.readingMode == ReadingMode.HIGH_CONTRAST)
+    }
+
+    val animatedScale by animateFloatAsState(
+        targetValue = currentScaleSlider,
+        label = "animatedAccessibilityScale"
+    )
+
     Scaffold(
         topBar = {
             TopAppBarWithLanguage(
-                title = if (uiState.language == AppLanguage.VI) "Bộ Trợ Năng Mở Rộng" else "Accessibility Suite",
+                title = if (uiState.language == AppLanguage.VI) "Trợ Năng Hiển Thị" else "Display Accessibility",
                 language = uiState.language,
                 isDarkMode = uiState.isDarkMode,
                 onBackClick = onBackClick,
@@ -90,111 +113,152 @@ fun AccessibilityScreen(
         ) {
             Spacer(modifier = Modifier.height(2.dp))
 
-            // Thẻ xem trước trực tiếp theo chế độ đọc đã chọn
-            FontPreviewCard(
-                selectedOption = uiState.selectedOption,
-                language = uiState.language,
-                readingMode = uiState.readingMode,
-                isBoldPreview = uiState.isBoldPreview
-            )
-
-            // PHẦN 1: CHẾ ĐỘ ĐỌC BẢO VỆ MẮT (Reading Modes)
-            Text(
-                text = if (uiState.language == AppLanguage.VI) "CHẾ ĐỘ ĐỌC BẢO VỆ MẮT" else "EYE-CARE READING MODES",
-                style = MaterialTheme.typography.labelMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = PurpleAccent,
-                    letterSpacing = 0.5.sp
-                )
-            )
-
-            ReadingModeItem(
-                title = if (uiState.language == AppLanguage.VI) "Chuẩn Hệ Thống" else "Standard System",
-                description = if (uiState.language == AppLanguage.VI) "Theo chế độ sáng / tối mặc định của máy" else "Follows system light / dark mode theme",
-                icon = Icons.Outlined.WbSunny,
-                isSelected = uiState.readingMode == ReadingMode.STANDARD,
-                onClick = { onReadingModeChange(ReadingMode.STANDARD) }
-            )
-
-            ReadingModeItem(
-                title = if (uiState.language == AppLanguage.VI) "Sách Giấy Cổ Điển (Sepia)" else "Warm Sepia (Book Mode)",
-                description = if (uiState.language == AppLanguage.VI) "Nền vàng kem dịu mắt, giảm ánh sáng xanh khi đọc ban đêm" else "Warm paper tint, reduces blue light strain at night",
-                icon = Icons.Outlined.Book,
-                isSelected = uiState.readingMode == ReadingMode.SEPIA,
-                accentColor = Color(0xFF8B4513),
-                onClick = { onReadingModeChange(ReadingMode.SEPIA) }
-            )
-
-            ReadingModeItem(
-                title = if (uiState.language == AppLanguage.VI) "Tương Phản Cao (WCAG AAA)" else "High Contrast (WCAG AAA)",
-                description = if (uiState.language == AppLanguage.VI) "Nền đen tuyền, chữ vàng chanh rực rỡ cho mắt yếu" else "Pure black & vivid yellow for low vision / elderly",
-                icon = Icons.Outlined.Contrast,
-                isSelected = uiState.readingMode == ReadingMode.HIGH_CONTRAST,
-                accentColor = Color(0xFFFDE047),
-                onClick = { onReadingModeChange(ReadingMode.HIGH_CONTRAST) }
-            )
-
-            // PHẦN 2: CHỮ ĐẬM TRỰC QUAN (Bold Text Toggle)
-            Text(
-                text = if (uiState.language == AppLanguage.VI) "TĂNG ĐỘ RÕ NÉT CỦA CHỮ" else "TEXT LEGIBILITY ENHANCEMENT",
-                style = MaterialTheme.typography.labelMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = PurpleAccent,
-                    letterSpacing = 0.5.sp
-                )
-            )
-
+            // 1. THẺ SO SÁNH TRỰC QUAN TRƯỚC / SAU KHI TỐI ƯU (Comparison Card)
             Card(
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (isHighContrastActive) Color(0xFF000000) else Color(0xFF1E293B)
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
+                    .border(
+                        width = 1.dp,
+                        color = if (isHighContrastActive) Color(0xFFFDE047) else Color(0xFF06B6D4).copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(20.dp)
+                    )
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth(0.75f)) {
+                        Text(
+                            text = if (uiState.language == AppLanguage.VI) "SAU KHI TỐI ƯU" else "AFTER OPTIMIZATION",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color(0xFF06B6D4),
+                            letterSpacing = 0.5.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = if (uiState.language == AppLanguage.VI)
+                                "Nội dung rõ nét, dễ đọc và tương phản cao."
+                            else
+                                "Crisp typography, easy to read with high contrast.",
+                            fontSize = (16 * animatedScale).sp,
+                            fontWeight = if (uiState.isBoldPreview) FontWeight.ExtraBold else FontWeight.Bold,
+                            lineHeight = (22 * animatedScale).sp,
+                            color = if (isHighContrastActive) Color(0xFFFDE047) else Color.White
+                        )
+                    }
+
+                    // Vạch chia so sánh phong cách thanh trượt kéo dọc (Cyan split bar)
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .padding(end = 12.dp)
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF06B6D4)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.CompareArrows,
+                            contentDescription = "Compare",
+                            tint = Color(0xFF0F172A),
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                }
+            }
+
+            // 2. PHẦN TÙY CHỈNH HỆ THỐNG
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(Color(0xFF06B6D4).copy(alpha = 0.15f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "A",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF06B6D4)
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = if (uiState.language == AppLanguage.VI) "TÙY CHỈNH HỆ THỐNG" else "SYSTEM ADJUSTMENTS",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF06B6D4),
+                    letterSpacing = 0.5.sp
+                )
+            }
+
+            // TÙY CHỌN 1: CHỮ ĐẬM TOÀN HỆ THỐNG [HOT]
+            Card(
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(18.dp))
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        .padding(18.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(38.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(MaterialTheme.colorScheme.surfaceVariant),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.FormatBold,
-                                contentDescription = "Bold text",
-                                tint = PurpleAccent,
-                                modifier = Modifier.size(20.dp)
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = if (uiState.language == AppLanguage.VI) "Chữ đậm toàn hệ thống" else "System Bold Text",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(PurpleAccent.copy(alpha = 0.2f))
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = "HOT",
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = PurpleAccent
+                                )
+                            }
                         }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column {
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = if (uiState.language == AppLanguage.VI) "Mô phỏng chữ đậm" else "Bold Text Preview",
-                                style = MaterialTheme.typography.titleSmall.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
+                                text = "Aa",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
-                                text = if (uiState.language == AppLanguage.VI)
-                                    "Tăng độ dày nét chữ để dễ nhận diện"
-                                else
-                                    "Increase stroke thickness for clearer reading",
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    fontSize = 11.sp
-                                )
+                                text = " ——— ",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+                            Text(
+                                text = "Aa",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = PurpleAccent
                             )
                         }
                     }
@@ -210,202 +274,206 @@ fun AccessibilityScreen(
                 }
             }
 
-            // PHẦN 3: GỢI Ý CỠ CHỮ THÔNG MINH (Reading Recommendations)
-            Text(
-                text = if (uiState.language == AppLanguage.VI) "GỢI Ý CỠ CHỮ THEO ĐỘ TUỔI & THỊ LỰC" else "SMART FONT RECOMMENDATIONS",
-                style = MaterialTheme.typography.labelMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = PurpleAccent,
-                    letterSpacing = 0.5.sp
-                )
-            )
+            // TÙY CHỌN 2: ĐỘ TƯƠNG PHẢN CAO
+            Card(
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(18.dp))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(18.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = if (uiState.language == AppLanguage.VI) "Độ tương phản cao" else "High Contrast Mode",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = if (uiState.language == AppLanguage.VI)
+                                "Tăng độ rõ nét cho văn bản khó đọc"
+                            else
+                                "Enhance contrast for low vision clarity",
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
 
-            RecommendationCard(
-                category = if (uiState.language == AppLanguage.VI) "Thị lực tốt / Giới trẻ" else "Normal Vision / Young",
-                scaleText = "1.00x (Chuẩn)",
-                hint = if (uiState.language == AppLanguage.VI) "Kích thước gốc của nhà sản xuất" else "Default manufacturer size",
-                onClick = { onSelectScale(FontSizeOption("Default", 1.00f)) }
-            )
+                    Switch(
+                        checked = isHighContrastActive,
+                        onCheckedChange = { checked ->
+                            isHighContrastActive = checked
+                            onReadingModeChange(if (checked) ReadingMode.HIGH_CONTRAST else ReadingMode.STANDARD)
+                        },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = Color(0xFF06B6D4)
+                        )
+                    )
+                }
+            }
 
-            RecommendationCard(
-                category = if (uiState.language == AppLanguage.VI) "Mắt cận thị / Mỏi mắt văn phòng" else "Myopia / Digital Eye Fatigue",
-                scaleText = "1.15x (Lớn)",
-                hint = if (uiState.language == AppLanguage.VI) "Tăng 15% kích thước, đọc thoải mái hơn" else "+15% scale for comfortable long reading",
-                onClick = { onSelectScale(FontSizeOption("Large", 1.15f)) }
-            )
+            // TÙY CHỌN 3: THU PHÓNG MÀN HÌNH (Stepped Cyan Slider)
+            Card(
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(18.dp))
+            ) {
+                Column(modifier = Modifier.padding(18.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "A",
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF06B6D4),
+                                fontSize = 14.sp
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = if (uiState.language == AppLanguage.VI) "Thu phóng màn hình" else "Screen Magnification",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
 
-            RecommendationCard(
-                category = if (uiState.language == AppLanguage.VI) "Người cao tuổi / Thị lực lão hóa" else "Elderly / Low Vision Accessibility",
-                scaleText = "1.30x - 1.50x (Rất Lớn)",
-                hint = if (uiState.language == AppLanguage.VI) "Chữ to bản, chống nhòe nét triệt để" else "Maximum clarity and magnified readability",
-                onClick = { onSelectScale(FontSizeOption("Extra Large", 1.30f)) }
-            )
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(Color(0xFF06B6D4).copy(alpha = 0.15f))
+                                .padding(horizontal = 8.dp, vertical = 3.dp)
+                        ) {
+                            Text(
+                                text = "${(currentScaleSlider * 100).toInt()}%",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF06B6D4)
+                            )
+                        }
+                    }
 
-            // Nút hoàn tất quay lại
+                    Spacer(modifier = Modifier.height(2.dp))
+
+                    Text(
+                        text = if (uiState.language == AppLanguage.VI)
+                            "Phóng to biểu tượng và kích thước chữ"
+                        else
+                            "Magnify system icons and reading typography",
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Slider(
+                        value = currentScaleSlider,
+                        onValueChange = { raw ->
+                            val stepped = (raw * 20).roundToInt() / 20f
+                            currentScaleSlider = stepped
+                            onSelectScale(FontSizeOption(label = "Custom (${String.format(java.util.Locale.US, "%.2fx", stepped)})", scale = stepped))
+                        },
+                        valueRange = 0.85f..1.50f,
+                        steps = 12,
+                        colors = SliderDefaults.colors(
+                            thumbColor = Color(0xFF06B6D4),
+                            activeTrackColor = Color(0xFF06B6D4),
+                            inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Outlined.DarkMode,
+                                contentDescription = "Small",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(text = "A", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = "A", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color(0xFF06B6D4))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Icon(
+                                imageVector = Icons.Outlined.CheckCircle,
+                                contentDescription = "Recommended",
+                                tint = Color(0xFF06B6D4),
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            // 3. NÚT LƯU VÀ ÁP DỤNG CẤU HÌNH (Purple CTA)
             Button(
-                onClick = onBackClick,
+                onClick = onApplyScale,
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = PurpleAccent,
+                    contentColor = Color.White
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(54.dp)
             ) {
-                Text(
-                    text = if (uiState.language == AppLanguage.VI) "Hoàn Tất & Về Trang Chủ" else "Complete & Return Home",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "",
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 16.sp
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = if (uiState.language == AppLanguage.VI) "Lưu và áp dụng cấu hình" else "Save & Apply Settings",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp
+                    )
+                }
+            }
+
+            // Nút "Khôi phục mặc định"
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                TextButton(
+                    onClick = {
+                        currentScaleSlider = 1.00f
+                        isHighContrastActive = false
+                        onReadingModeChange(ReadingMode.STANDARD)
+                        onSelectScale(FontSizeOption(label = "Default (1.00x)", scale = 1.00f))
+                    }
+                ) {
+                    Text(
+                        text = if (uiState.language == AppLanguage.VI) "Khôi phục mặc định" else "Reset to Default",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-        }
-    }
-}
-
-@Composable
-private fun ReadingModeItem(
-    title: String,
-    description: String,
-    icon: ImageVector,
-    isSelected: Boolean,
-    accentColor: Color = PurpleAccent,
-    onClick: () -> Unit
-) {
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 3.dp else 1.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(
-                width = if (isSelected) 2.dp else 1.dp,
-                color = if (isSelected) accentColor else MaterialTheme.colorScheme.outline,
-                shape = RoundedCornerShape(16.dp)
-            )
-            .clickable(onClick = onClick)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(38.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(if (isSelected) accentColor.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = title,
-                        tint = if (isSelected) accentColor else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    )
-                    Text(
-                        text = description,
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 11.sp
-                        )
-                    )
-                }
-            }
-
-            if (isSelected) {
-                Box(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(accentColor),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Check,
-                        contentDescription = "Selected",
-                        tint = Color.White,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun RecommendationCard(
-    category: String,
-    scaleText: String,
-    hint: String,
-    onClick: () -> Unit
-) {
-    Card(
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(14.dp))
-            .clickable(onClick = onClick)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = category,
-                    style = MaterialTheme.typography.titleSmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = 13.sp
-                    )
-                )
-                Text(
-                    text = hint,
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 11.sp
-                    )
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .padding(horizontal = 10.dp, vertical = 4.dp)
-            ) {
-                Text(
-                    text = scaleText,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp,
-                    color = PurpleAccent
-                )
-            }
         }
     }
 }
