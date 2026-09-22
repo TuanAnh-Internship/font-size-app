@@ -19,7 +19,9 @@ enum class ScreenDestination {
     MAIN_FONT,
     PERMISSION,
     RESULT,
-    ACCESSIBILITY
+    ACCESSIBILITY,
+    EYE_TEST,
+    FONT_GALLERY
 }
 
 /**
@@ -36,6 +38,7 @@ data class FontSizeUiState(
     val language: AppLanguage = AppLanguage.VI,
     val isDarkMode: Boolean = false,
     val currentScreen: ScreenDestination = ScreenDestination.MAIN_FONT,
+    val selectedTab: Int = 0,
     val readingMode: ReadingMode = ReadingMode.STANDARD,
     val isBoldPreview: Boolean = false,
     val showOemFallbackDialog: Boolean = false

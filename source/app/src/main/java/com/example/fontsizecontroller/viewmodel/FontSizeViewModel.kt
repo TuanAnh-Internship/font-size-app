@@ -225,9 +225,54 @@ class FontSizeViewModel(
     }
 
     /**
+     * Điều hướng chuyển đổi tab trên Bottom Navigation Bar.
+     */
+    fun selectTab(index: Int) {
+        val destination = when (index) {
+            0 -> ScreenDestination.MAIN_FONT
+            1 -> ScreenDestination.EYE_TEST
+            2 -> ScreenDestination.FONT_GALLERY
+            3 -> ScreenDestination.ACCESSIBILITY
+            else -> ScreenDestination.MAIN_FONT
+        }
+        _uiState.update {
+            it.copy(
+                selectedTab = index,
+                currentScreen = destination
+            )
+        }
+    }
+
+    /**
+     * Áp dụng cỡ chữ được đề xuất từ Bài kiểm tra thị lực thông minh.
+     */
+    fun applyRecommendedScale(scale: Float, label: String) {
+        val option = FontSizeOption(label = label, scale = scale)
+        _uiState.update {
+            it.copy(
+                selectedOption = option,
+                selectedTab = 0,
+                currentScreen = ScreenDestination.MAIN_FONT
+            )
+        }
+    }
+
+    /**
      * Điều hướng màn hình trong ứng dụng.
      */
     fun navigateTo(destination: ScreenDestination) {
-        _uiState.update { it.copy(currentScreen = destination) }
+        val tab = when (destination) {
+            ScreenDestination.MAIN_FONT -> 0
+            ScreenDestination.EYE_TEST -> 1
+            ScreenDestination.FONT_GALLERY -> 2
+            ScreenDestination.ACCESSIBILITY -> 3
+            else -> _uiState.value.selectedTab
+        }
+        _uiState.update {
+            it.copy(
+                currentScreen = destination,
+                selectedTab = tab
+            )
+        }
     }
 }

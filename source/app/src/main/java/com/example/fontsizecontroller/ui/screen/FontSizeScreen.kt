@@ -58,7 +58,8 @@ fun FontSizeScreen(
     onOpenAccessibility: () -> Unit,
     onOpenDisplaySettings: () -> Unit,
     onDismissOemDialog: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    bottomBar: @Composable () -> Unit = {}
 ) {
     val scrollState = rememberScrollState()
 
@@ -73,6 +74,7 @@ fun FontSizeScreen(
                 onToggleDarkMode = onToggleDarkMode
             )
         },
+        bottomBar = bottomBar,
         containerColor = MaterialTheme.colorScheme.background,
         modifier = modifier
     ) { innerPadding ->

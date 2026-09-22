@@ -10,6 +10,7 @@ val BgLight = Color(0xFFF8FAFC)           // Màu nền trắng ngà dịu mắt
 val SurfaceWhite = Color(0xFFFFFFFF)      // Màu nền card trắng
 val BadgeTint = Color(0xFFEEF2FF)         // Màu nền mềm cho icon & badge
 val SuccessGreen = Color(0xFF00C48C)      // Màu xanh ngọc lục bảo tích thành công
+val MintSuccess = SuccessGreen            // Alias MintSuccess
 val BorderLight = Color(0xFFE2E8F0)       // Màu viền mờ tinh tế
 val TextPrimary = Color(0xFF0F172A)       // Chữ đen than có độ tương phản cao
 val TextSecondary = Color(0xFF64748B)     // Chữ phụ màu xám slate

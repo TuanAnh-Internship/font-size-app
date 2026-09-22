@@ -18,7 +18,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.MenuBook
+import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Contrast
 import androidx.compose.material.icons.outlined.FormatBold
@@ -60,7 +60,8 @@ fun AccessibilityScreen(
     onBackClick: () -> Unit,
     onToggleLanguage: () -> Unit,
     onToggleDarkMode: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    bottomBar: @Composable () -> Unit = {}
 ) {
     val scrollState = rememberScrollState()
 
@@ -75,6 +76,7 @@ fun AccessibilityScreen(
                 onToggleDarkMode = onToggleDarkMode
             )
         },
+        bottomBar = bottomBar,
         containerColor = MaterialTheme.colorScheme.background,
         modifier = modifier
     ) { innerPadding ->
@@ -117,7 +119,7 @@ fun AccessibilityScreen(
             ReadingModeItem(
                 title = if (uiState.language == AppLanguage.VI) "Sách Giấy Cổ Điển (Sepia)" else "Warm Sepia (Book Mode)",
                 description = if (uiState.language == AppLanguage.VI) "Nền vàng kem dịu mắt, giảm ánh sáng xanh khi đọc ban đêm" else "Warm paper tint, reduces blue light strain at night",
-                icon = Icons.Outlined.MenuBook,
+                icon = Icons.Outlined.Book,
                 isSelected = uiState.readingMode == ReadingMode.SEPIA,
                 accentColor = Color(0xFF8B4513),
                 onClick = { onReadingModeChange(ReadingMode.SEPIA) }
