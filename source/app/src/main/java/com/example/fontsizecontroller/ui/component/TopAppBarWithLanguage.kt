@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.Translate
@@ -45,6 +46,7 @@ fun TopAppBarWithLanguage(
     onBackClick: (() -> Unit)? = null,
     onToggleLanguage: () -> Unit,
     onToggleDarkMode: () -> Unit,
+    onSettingsClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     TopAppBar(
@@ -88,7 +90,7 @@ fun TopAppBarWithLanguage(
                 )
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(6.dp))
 
             // Nút Pill ngôn ngữ tối giản với icon Translate
             Box(
@@ -97,7 +99,7 @@ fun TopAppBarWithLanguage(
                     .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(50.dp))
                     .background(MaterialTheme.colorScheme.surface)
                     .clickable { onToggleLanguage() }
-                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                    .padding(horizontal = 9.dp, vertical = 6.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -105,14 +107,33 @@ fun TopAppBarWithLanguage(
                         imageVector = Icons.Outlined.Translate,
                         contentDescription = "Language",
                         tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(15.dp)
+                        modifier = Modifier.size(14.dp)
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(modifier = Modifier.width(3.dp))
                     Text(
                         text = if (language == AppLanguage.VI) "VI" else "EN",
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+
+            if (onSettingsClick != null) {
+                Spacer(modifier = Modifier.width(6.dp))
+                Box(
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable { onSettingsClick() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Settings,
+                        contentDescription = "Settings",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }

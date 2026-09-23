@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_notification_card"
+    android:padding="12dp">
+
+    <!-- Header: Tiêu đề và Huy hiệu cỡ chữ hiện tại -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="⚡ ĐIỀU KHIỂN CỠ CHỮ HỆ THỐNG"
+            android:textColor="#E2E8F0"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.04" />
+
+        <TextView
+            android:id="@+id/tv_expanded_scale_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1.20x"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:background="@drawable/bg_scale_badge"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="3dp" />
+    </LinearLayout>
+
+    <!-- Thanh trượt mức cỡ chữ trực quan (Visual Slider Track) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thanh kéo tỉ lệ cỡ chữ (0.85x ──▶ 2.00x):"
+            android:textColor="#94A3B8"
+            android:textSize="11sp" />
+
+        <!-- Progress Bar tiến trình -->
+        <ProgressBar
+            android:id="@+id/pb_scale_track"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="7dp"
+            android:layout_marginTop="6dp"
+            android:max="100"
+            android:progress="30"
+            android:progressDrawable="@drawable/custom_progress_track" />
+
+        <!-- 6 Mốc chạm nhanh trên thanh trượt -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_node_85"
+                android:layout_width="0dp"
+                android:layout_height="28dp"
+                android:layout_weight="1"
+                android:text="0.85x"
+                android:textColor="#CBD5E1"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_track_node"
+                android:padding="0dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp" />
+
+            <Button
+                android:id="@+id/btn_node_100"
+                android:layout_width="0dp"
+                android:layout_height="28dp"
+                android:layout_weight="1"
+                android:layout_marginStart="3dp"
+                android:text="1.00x"
+                android:textColor="#CBD5E1"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_track_node"
+                android:padding="0dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp" />
+
+            <Button
+                android:id="@+id/btn_node_115"
+                android:layout_width="0dp"
+                android:layout_height="28dp"
+                android:layout_weight="1"
+                android:layout_marginStart="3dp"
+                android:text="1.15x"
+                android:textColor="#CBD5E1"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_track_node"
+                android:padding="0dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp" />
+
+            <Button
+                android:id="@+id/btn_node_130"
+                android:layout_width="0dp"
+                android:layout_height="28dp"
+                android:layout_weight="1"
+                android:layout_marginStart="3dp"
+                android:text="1.30x"
+                android:textColor="#CBD5E1"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_track_node"
+                android:padding="0dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp" />
+
+            <Button
+                android:id="@+id/btn_node_160"
+                android:layout_width="0dp"
+                android:layout_height="28dp"
+                android:layout_weight="1"
+                android:layout_marginStart="3dp"
+                android:text="1.60x"
+                android:textColor="#CBD5E1"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_track_node"
+                android:padding="0dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp" />
+
+            <Button
+                android:id="@+id/btn_node_200"
+                android:layout_width="0dp"
+                android:layout_height="28dp"
+                android:layout_weight="1"
+                android:layout_marginStart="3dp"
+                android:text="2.00x"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_track_node_active"
+                android:padding="0dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Hàng nút tinh chỉnh (Stepper & Quick buttons) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_step_down"
+            android:layout_width="0dp"
+            android:layout_height="34dp"
+            android:layout_weight="1"
+            android:text="[-] Giảm"
+            android:textColor="#FFFFFF"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:background="@drawable/bg_pill_button"
+            android:padding="0dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp" />
+
+        <Button
+            android:id="@+id/btn_step_up"
+            android:layout_width="0dp"
+            android:layout_height="34dp"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:text="[+] Tăng"
+            android:textColor="#FFFFFF"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:background="@drawable/bg_pill_button"
+            android:padding="0dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp" />
+
+        <Button
+            android:id="@+id/btn_quick_reset"
+            android:layout_width="0dp"
+            android:layout_height="34dp"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:text="1.00x Chuẩn"
+            android:textColor="#CBD5E1"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:background="@drawable/bg_track_node"
+            android:padding="0dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp" />
+
+        <Button
+            android:id="@+id/btn_quick_max"
+            android:layout_width="0dp"
+            android:layout_height="34dp"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:text="2.00x Max"
+            android:textColor="#FFFFFF"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:background="@drawable/bg_track_node_active"
+            android:padding="0dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp" />
+    </LinearLayout>
+
+</LinearLayout>

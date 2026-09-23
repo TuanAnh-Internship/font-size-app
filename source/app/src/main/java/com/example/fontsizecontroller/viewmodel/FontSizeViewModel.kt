@@ -50,7 +50,9 @@ class FontSizeViewModel(
                         readingMode = userPref.readingMode,
                         isBoldPreview = userPref.isBoldPreview,
                         eyeTestDone = userPref.eyeTestDone,
-                        eyeTestResultScale = userPref.eyeTestResultScale
+                        eyeTestResultScale = userPref.eyeTestResultScale,
+                        selectedProfileId = userPref.selectedProfileId,
+                        selectedFontName = userPref.selectedFontName
                     )
                 }
             }
@@ -276,6 +278,78 @@ class FontSizeViewModel(
             )
         }
         applySelectedScale()
+    }
+
+    /**
+     * Hiển thị hộp thoại xác nhận khôi phục cỡ chữ chuẩn 1.00x.
+     */
+    fun showResetConfirmation() {
+        _uiState.update { it.copy(showResetDialog = true) }
+    }
+
+    /**
+     * Đóng hộp thoại xác nhận khôi phục mặc định.
+     */
+    fun dismissResetConfirmation() {
+        _uiState.update { it.copy(showResetDialog = false) }
+    }
+
+    /**
+     * Xác nhận khôi phục cỡ chữ về 1.00x chuẩn của hệ thống Android.
+     */
+    fun confirmResetDefault() {
+        _uiState.update {
+            it.copy(
+                showResetDialog = false,
+                selectedOption = FontSizeOption("Mặc Định", 1.00f),
+                selectedProfileId = "myself"
+            )
+        }
+        applySelectedScale()
+        viewModelScope.launch {
+            preferencesRepository?.setSelectedProfileId("myself")
+        }
+    }
+
+    /**
+     * Chọn và áp dụng hồ sơ cỡ chữ gia đình (Cá nhân, Bố mẹ, Ông bà).
+     */
+    fun selectFamilyProfile(profileId: String, scale: Float) {
+        val label = when (profileId) {
+            "parents" -> "Bố Mẹ (1.15x)"
+            "grandparents" -> "Ông Bà (1.30x)"
+            else -> "Cá Nhân (1.00x)"
+        }
+        _uiState.update {
+            it.copy(
+                selectedProfileId = profileId,
+                selectedOption = FontSizeOption(label, scale)
+            )
+        }
+        applySelectedScale()
+        viewModelScope.launch {
+            preferencesRepository?.setSelectedProfileId(profileId)
+        }
+    }
+
+    /**
+     * Khôi phục toàn bộ cài đặt ứng dụng về ban đầu.
+     */
+    fun resetAllAppData() {
+        viewModelScope.launch {
+            preferencesRepository?.resetAllPreferences()
+            loadCurrentSettings()
+        }
+    }
+
+    /**
+     * Áp dụng kiểu chữ (Font Family) cho toàn bộ ứng dụng và lưu bền vững vào DataStore.
+     */
+    fun selectFontFamily(fontName: String) {
+        _uiState.update { it.copy(selectedFontName = fontName) }
+        viewModelScope.launch {
+            preferencesRepository?.setSelectedFontName(fontName)
+        }
     }
 
     /**

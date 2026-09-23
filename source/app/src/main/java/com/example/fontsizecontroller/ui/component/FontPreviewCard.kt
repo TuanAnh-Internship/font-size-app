@@ -124,27 +124,27 @@ fun FontPreviewCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = if (language == AppLanguage.VI) "Trải nghiệm văn bản thực tế" else "Real-time Text Experience",
-                fontSize = (18 * animatedScale).sp,
+                text = if (language == AppLanguage.VI) "Văn bản mẫu" else "Sample Text",
+                fontSize = (15 * animatedScale.coerceAtMost(1.25f)).sp,
                 fontWeight = if (isBoldPreview) FontWeight.ExtraBold else FontWeight.Bold,
                 color = contentColor,
-                lineHeight = (24 * animatedScale).sp
+                lineHeight = (20 * animatedScale.coerceAtMost(1.25f)).sp
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             Text(
                 text = if (language == AppLanguage.VI)
-                    "Văn bản mẫu sẽ co giãn trực quan theo tỷ lệ ${String.format(java.util.Locale.US, "%.2fx", targetScale)} giúp bạn dễ dàng quan sát trước khi lưu cài đặt."
+                    "Chữ hiển thị rõ nét, kích thước chuẩn dễ đọc."
                 else
-                    "Sample text scales smoothly at ${String.format(java.util.Locale.US, "%.2fx", targetScale)} allowing you to preview layout clarity before applying.",
+                    "Text renders clearly and comfortably.",
                 fontSize = (14 * animatedScale).sp,
                 fontWeight = if (isBoldPreview) FontWeight.Bold else FontWeight.Normal,
                 color = subContentColor,
-                lineHeight = (20 * animatedScale).sp
+                lineHeight = (19 * animatedScale).sp
             )
         }
     }

@@ -66,7 +66,7 @@ fun AccessibilityScreen(
     onToggleBold: () -> Unit,
     onSelectScale: (FontSizeOption) -> Unit,
     onApplyScale: () -> Unit = {},
-    onBackClick: () -> Unit,
+    onOpenSettings: () -> Unit,
     onToggleLanguage: () -> Unit,
     onToggleDarkMode: () -> Unit,
     modifier: Modifier = Modifier,
@@ -94,9 +94,10 @@ fun AccessibilityScreen(
                 title = if (uiState.language == AppLanguage.VI) "Trợ Năng Hiển Thị" else "Display Accessibility",
                 language = uiState.language,
                 isDarkMode = uiState.isDarkMode,
-                onBackClick = onBackClick,
+                onBackClick = null,
                 onToggleLanguage = onToggleLanguage,
-                onToggleDarkMode = onToggleDarkMode
+                onToggleDarkMode = onToggleDarkMode,
+                onSettingsClick = onOpenSettings
             )
         },
         bottomBar = bottomBar,
@@ -146,12 +147,12 @@ fun AccessibilityScreen(
 
                         Text(
                             text = if (uiState.language == AppLanguage.VI)
-                                "Nội dung rõ nét, dễ đọc và tương phản cao."
+                                "Nội dung rõ nét, dễ đọc."
                             else
-                                "Crisp typography, easy to read with high contrast.",
-                            fontSize = (16 * animatedScale).sp,
+                                "Crisp text, easy to read.",
+                            fontSize = (15 * animatedScale.coerceAtMost(1.3f)).sp,
                             fontWeight = if (uiState.isBoldPreview) FontWeight.ExtraBold else FontWeight.Bold,
-                            lineHeight = (22 * animatedScale).sp,
+                            lineHeight = (20 * animatedScale.coerceAtMost(1.3f)).sp,
                             color = if (isHighContrastActive) Color(0xFFFDE047) else Color.White
                         )
                     }

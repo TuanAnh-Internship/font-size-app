@@ -57,7 +57,7 @@ import com.example.fontsizecontroller.ui.theme.PurpleAccent
 fun EyeTestScreen(
     uiState: FontSizeUiState,
     onApplyRecommendedScale: (Float, String) -> Unit,
-    onBackClick: () -> Unit,
+    onOpenSettings: () -> Unit,
     onToggleLanguage: () -> Unit,
     onToggleDarkMode: () -> Unit,
     modifier: Modifier = Modifier,
@@ -100,9 +100,10 @@ fun EyeTestScreen(
                 title = if (uiState.language == AppLanguage.VI) "Kiểm Tra Thị Lực" else "Vision Eye Test",
                 language = uiState.language,
                 isDarkMode = uiState.isDarkMode,
-                onBackClick = onBackClick,
+                onBackClick = null,
                 onToggleLanguage = onToggleLanguage,
-                onToggleDarkMode = onToggleDarkMode
+                onToggleDarkMode = onToggleDarkMode,
+                onSettingsClick = onOpenSettings
             )
         },
         bottomBar = bottomBar,

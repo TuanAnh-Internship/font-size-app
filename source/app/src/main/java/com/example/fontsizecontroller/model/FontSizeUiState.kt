@@ -21,7 +21,9 @@ enum class ScreenDestination {
     RESULT,
     ACCESSIBILITY,
     EYE_TEST,
-    FONT_GALLERY
+    FONT_GALLERY,
+    SETTINGS_AND_HELP,
+    UNSUPPORTED_ERROR
 }
 
 /**
@@ -43,5 +45,8 @@ data class FontSizeUiState(
     val isBoldPreview: Boolean = false,
     val showOemFallbackDialog: Boolean = false,
     val eyeTestDone: Boolean = false,
-    val eyeTestResultScale: Float = 1.0f
+    val eyeTestResultScale: Float = 1.0f,
+    val showResetDialog: Boolean = false,
+    val selectedProfileId: String = "myself",
+    val selectedFontName: String = "Roboto"
 )

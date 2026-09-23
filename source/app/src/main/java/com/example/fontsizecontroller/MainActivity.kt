@@ -10,6 +10,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModel
@@ -27,6 +28,7 @@ import com.example.fontsizecontroller.ui.screen.FontSizeScreen
 import com.example.fontsizecontroller.ui.screen.OnboardingScreen
 import com.example.fontsizecontroller.ui.screen.PermissionScreen
 import com.example.fontsizecontroller.ui.screen.ResultScreen
+import com.example.fontsizecontroller.service.QuickControlNotificationManager
 import com.example.fontsizecontroller.ui.theme.FontSizeControllerTheme
 import com.example.fontsizecontroller.viewmodel.FontSizeViewModel
 
@@ -56,6 +58,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             val uiState by viewModel.uiState.collectAsState()
 
+            LaunchedEffect(uiState.currentScale) {
+                QuickControlNotificationManager.showNotification(
+                    this@MainActivity,
+                    uiState.currentScale
+                )
+            }
+
             val sharedBottomBar: @Composable () -> Unit = {
                 AppBottomNavigationBar(
                     selectedTab = uiState.selectedTab,
@@ -64,7 +73,14 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
-            FontSizeControllerTheme(darkTheme = uiState.isDarkMode) {
+            val currentFontFamily = androidx.compose.runtime.remember(uiState.selectedFontName) {
+                com.example.fontsizecontroller.ui.theme.getFontFamilyFromName(uiState.selectedFontName)
+            }
+
+            FontSizeControllerTheme(
+                darkTheme = uiState.isDarkMode,
+                fontFamily = currentFontFamily
+            ) {
                 when (uiState.currentScreen) {
                     ScreenDestination.ONBOARDING -> {
                         OnboardingScreen(
@@ -79,13 +95,35 @@ class MainActivity : ComponentActivity() {
                             uiState = uiState,
                             onSelectOption = { viewModel.selectOption(it) },
                             onApply = { viewModel.applySelectedScale() },
-                            onBackClick = { viewModel.navigateTo(ScreenDestination.ONBOARDING) },
                             onToggleLanguage = { viewModel.toggleLanguage() },
                             onToggleDarkMode = { viewModel.toggleDarkMode() },
                             onOpenAccessibility = { viewModel.navigateTo(ScreenDestination.ACCESSIBILITY) },
                             onOpenDisplaySettings = { openDisplaySettings(this@MainActivity) },
                             onDismissOemDialog = { viewModel.dismissOemFallbackDialog() },
+                            onOpenSettings = { viewModel.navigateTo(ScreenDestination.SETTINGS_AND_HELP) },
+                            onResetDefault = { viewModel.showResetConfirmation() },
+                            onConfirmReset = { viewModel.confirmResetDefault() },
+                            onDismissResetDialog = { viewModel.dismissResetConfirmation() },
+                            onSelectProfile = { id, scale -> viewModel.selectFamilyProfile(id, scale) },
                             bottomBar = sharedBottomBar
+                        )
+                    }
+
+                    ScreenDestination.SETTINGS_AND_HELP -> {
+                        com.example.fontsizecontroller.ui.screen.SettingsAndHelpScreen(
+                            viewModel = viewModel,
+                            uiState = uiState
+                        )
+                    }
+
+                    ScreenDestination.UNSUPPORTED_ERROR -> {
+                        com.example.fontsizecontroller.ui.screen.UnsupportedErrorScreen(
+                            language = uiState.language,
+                            isDarkMode = uiState.isDarkMode,
+                            onCloseClick = { viewModel.navigateTo(ScreenDestination.MAIN_FONT) },
+                            onBackClick = { viewModel.navigateTo(ScreenDestination.MAIN_FONT) },
+                            onToggleLanguage = { viewModel.toggleLanguage() },
+                            onToggleDarkMode = { viewModel.toggleDarkMode() }
                         )
                     }
 
@@ -95,7 +133,7 @@ class MainActivity : ComponentActivity() {
                             onApplyRecommendedScale = { scale, label ->
                                 viewModel.applyRecommendedScale(scale, label)
                             },
-                            onBackClick = { viewModel.selectTab(0) },
+                            onOpenSettings = { viewModel.navigateTo(ScreenDestination.SETTINGS_AND_HELP) },
                             onToggleLanguage = { viewModel.toggleLanguage() },
                             onToggleDarkMode = { viewModel.toggleDarkMode() },
                             bottomBar = sharedBottomBar
@@ -106,7 +144,8 @@ class MainActivity : ComponentActivity() {
                         FontGalleryScreen(
                             uiState = uiState,
                             onApplyScale = { viewModel.selectAndApplyOption(it) },
-                            onBackClick = { viewModel.selectTab(0) },
+                            onApplyFontFamily = { viewModel.selectFontFamily(it) },
+                            onOpenSettings = { viewModel.navigateTo(ScreenDestination.SETTINGS_AND_HELP) },
                             onToggleLanguage = { viewModel.toggleLanguage() },
                             onToggleDarkMode = { viewModel.toggleDarkMode() },
                             bottomBar = sharedBottomBar
@@ -120,7 +159,7 @@ class MainActivity : ComponentActivity() {
                             onToggleBold = { viewModel.toggleBoldPreview() },
                             onSelectScale = { viewModel.selectOption(it) },
                             onApplyScale = { viewModel.applySelectedScale() },
-                            onBackClick = { viewModel.selectTab(0) },
+                            onOpenSettings = { viewModel.navigateTo(ScreenDestination.SETTINGS_AND_HELP) },
                             onToggleLanguage = { viewModel.toggleLanguage() },
                             onToggleDarkMode = { viewModel.toggleDarkMode() },
                             bottomBar = sharedBottomBar
