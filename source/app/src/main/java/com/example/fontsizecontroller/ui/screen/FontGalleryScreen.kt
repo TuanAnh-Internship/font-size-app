@@ -3,6 +3,7 @@ package com.example.fontsizecontroller.ui.screen
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,10 +31,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.FormatColorText
+import androidx.compose.material.icons.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Button
@@ -43,8 +50,11 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -193,6 +203,7 @@ fun FontGalleryScreen(
 
     var dropdownExpanded by remember { mutableStateOf(false) }
     var isPreviewExpanded by remember { mutableStateOf(false) }
+    var customPreviewText by remember { mutableStateOf("") }
 
     // Kiểm tra xem font đang chọn xem có phải là font đang áp dụng toàn app hay không
     val isCurrentlyActive = uiState.selectedFontName.equals(currentSelectedFont.name, ignoreCase = true)
@@ -442,9 +453,9 @@ fun FontGalleryScreen(
                                     text = {
                                         Text(
                                             text = if (uiState.language == AppLanguage.VI)
-                                                "+ Cài đặt kiểu chữ mới..."
+                                                "Cài đặt kiểu chữ mới..."
                                             else
-                                                "+ Install new font style...",
+                                                "Install new font style...",
                                             fontSize = 14.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = PurpleAccent
@@ -455,6 +466,113 @@ fun FontGalleryScreen(
                                         openSystemFontSettings(context)
                                     }
                                 )
+                            }
+                        }
+                    }
+
+                    // ── Ô NHẬP VĂN BẢN TÙY CHỌN & CHIPS GỢI Ý MẪU ──
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = if (uiState.language == AppLanguage.VI)
+                                    "Thử gõ chữ tùy ý:"
+                                else "Try custom text:",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            if (customPreviewText.isNotEmpty()) {
+                                Text(
+                                    text = if (uiState.language == AppLanguage.VI) "Xóa chữ" else "Clear",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = PurpleAccent,
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .clickable { customPreviewText = "" }
+                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        OutlinedTextField(
+                            value = customPreviewText,
+                            onValueChange = { customPreviewText = it },
+                            placeholder = {
+                                Text(
+                                    text = if (uiState.language == AppLanguage.VI)
+                                        "Nhập tên, tin nhắn hoặc câu chữ bất kỳ..."
+                                    else "Type words, messages or names to preview...",
+                                    fontSize = 13.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Outlined.Edit,
+                                    contentDescription = null,
+                                    tint = PurpleAccent,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            },
+                            trailingIcon = {
+                                if (customPreviewText.isNotEmpty()) {
+                                    IconButton(onClick = { customPreviewText = "" }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Clear,
+                                            contentDescription = "Clear",
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                }
+                            },
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = PurpleAccent,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        // Các mẫu chữ gợi ý nhanh (Quick Chips)
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Row(
+                            modifier = Modifier.horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            val quickSamples = if (uiState.language == AppLanguage.VI) {
+                                listOf(
+                                    "Xin chào Việt Nam",
+                                    "FontM dễ đọc",
+                                    "0988 123 456",
+                                    "Mẹ ơi con về rồi!",
+                                    "Cỡ chữ 100%"
+                                )
+                            } else {
+                                listOf("Hello World", "FontM is awesome", "+1 234 567 890", "Family Love", "Clear Text")
+                            }
+                            quickSamples.forEach { sample ->
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                                        .clickable { customPreviewText = sample }
+                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                ) {
+                                    Text(
+                                        text = sample,
+                                        fontSize = 11.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
                             }
                         }
                     }
@@ -474,9 +592,11 @@ fun FontGalleryScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = if (uiState.language == AppLanguage.VI)
-                                        "MẪU XEM TRƯỚC"
-                                    else "PREVIEW SAMPLE",
+                                    text = if (customPreviewText.isNotBlank()) {
+                                        if (uiState.language == AppLanguage.VI) "XEM CHỮ BẠN NHẬP" else "CUSTOM TEXT PREVIEW"
+                                    } else {
+                                        if (uiState.language == AppLanguage.VI) "MẪU XEM TRƯỚC" else "PREVIEW SAMPLE"
+                                    },
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.ExtraBold,
                                     color = currentSelectedFont.tagColor,
@@ -486,14 +606,21 @@ fun FontGalleryScreen(
 
                             Spacer(modifier = Modifier.height(10.dp))
 
-                            // Chữ cái mẫu kích thước lớn
+                            // Hiển thị chữ cái mẫu hoặc nội dung do người dùng tự nhập
                             Text(
-                                text = "Aa Bb Cc 12345",
-                                fontSize = 28.sp,
+                                text = if (customPreviewText.isNotBlank()) customPreviewText else "Aa Bb Cc 12345",
+                                fontSize = if (customPreviewText.isNotBlank()) (24 * currentScale).coerceIn(
+                                    18f,
+                                    34f
+                                ).sp else 28.sp,
                                 fontFamily = currentSelectedFont.fontFamily,
                                 fontStyle = currentSelectedFont.fontStyle,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = if (customPreviewText.isNotBlank()) PurpleAccent else MaterialTheme.colorScheme.onSurface,
+                                lineHeight = if (customPreviewText.isNotBlank()) (30 * currentScale).coerceIn(
+                                    22f,
+                                    40f
+                                ).sp else 34.sp
                             )
 
                             Spacer(modifier = Modifier.height(8.dp))
@@ -531,22 +658,56 @@ fun FontGalleryScreen(
                         exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top)
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                            // Mẫu tin nhắn Zalo
+                            // Mẫu tin nhắn Zalo mô phỏng
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(14.dp))
                                     .background(PurpleAccent.copy(alpha = 0.08f))
                                     .padding(12.dp)
-                            ) 
+                            ) {
+                                Row(verticalAlignment = Alignment.Top) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Outlined.Chat,
+                                        contentDescription = null,
+                                        tint = PurpleAccent,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Column {
+                                        Text(
+                                            text = if (uiState.language == AppLanguage.VI)
+                                                "Mô phỏng tin nhắn hội thoại:"
+                                            else "Conversation message preview:",
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = PurpleAccent
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = if (customPreviewText.isNotBlank())
+                                                customPreviewText
+                                            else if (uiState.language == AppLanguage.VI)
+                                                "\"Con chuẩn bị về nhà rồi bố mẹ nhé! Hôm nay cơm ngon quá ạ.\""
+                                            else
+                                                "\"I'm heading home now! Looking forward to family dinner.\"",
+                                            fontSize = (13 * currentScale).sp,
+                                            fontFamily = currentSelectedFont.fontFamily,
+                                            fontStyle = currentSelectedFont.fontStyle,
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            lineHeight = (18 * currentScale).sp
+                                        )
+                                    }
+                                }
                             }
                         }
+                    }
 
-                        // ── HÀNG NÚT BẤM DUY NHẤT: XEM THỬ & ÁP DỤNG ──
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
+                    // ── HÀNG NÚT BẤM 1: XEM THỬ & ÁP DỤNG TRONG FONTM ──
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
                             // Nút Xem thử
                             OutlinedButton(
                                 onClick = { isPreviewExpanded = !isPreviewExpanded },
@@ -574,16 +735,16 @@ fun FontGalleryScreen(
                                 )
                             }
 
-                            // Nút Áp dụng
+                            // Nút Áp dụng trong FontM
                             Button(
                                 onClick = {
                                     onApplyFontFamily(currentSelectedFont.name)
                                     android.widget.Toast.makeText(
                                         context,
                                         if (uiState.language == AppLanguage.VI)
-                                            "Đã áp dụng kiểu chữ \"${currentSelectedFont.name}\" thành công!"
+                                            "✓ Đã áp dụng font \"${currentSelectedFont.name}\" cho FontM!"
                                         else
-                                            "Applied font \"${currentSelectedFont.name}\" successfully!",
+                                            "✓ Applied font \"${currentSelectedFont.name}\" to FontM!",
                                         android.widget.Toast.LENGTH_SHORT
                                     ).show()
                                 },
@@ -604,51 +765,137 @@ fun FontGalleryScreen(
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text(
-                                        text = if (uiState.language == AppLanguage.VI) "Đã áp dụng" else "✓ Applied",
-                                        fontSize = 13.sp,
+                                        text = if (uiState.language == AppLanguage.VI) "Đang dùng trong App" else "✓ In Use (App)",
+                                        fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold
                                     )
                                 } else {
                                     Text(
-                                        text = if (uiState.language == AppLanguage.VI) "Áp dụng" else "Apply",
+                                        text = if (uiState.language == AppLanguage.VI) "Áp dụng trong App" else "Apply to App",
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
                             }
                         }
-                    }
-                }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                        // ── NÚT BẤM 2: ÁP DỤNG CHO TOÀN BỘ ĐIỆN THOẠI (HỆ THỐNG & CÁC APP KHÁC) ──
+                        Button(
+                            onClick = {
+                                android.widget.Toast.makeText(
+                                    context,
+                                    if (uiState.language == AppLanguage.VI)
+                                        "Đang mở Cài đặt Phông Chữ của máy... Hãy chọn font mong muốn nhé!"
+                                    else
+                                        "Opening System Font Settings... Select your font to apply system-wide!",
+                                    android.widget.Toast.LENGTH_LONG
+                                ).show()
+                                openSystemFontSettings(context)
+                            },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PhoneAndroid,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = if (uiState.language == AppLanguage.VI)
+                                    "Đổi kiểu chữ cho toàn bộ điện thoại"
+                                else
+                                    "Apply font system-wide (Device Settings)",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Icon(
+                                imageVector = Icons.Outlined.OpenInNew,
+                                contentDescription = null,
+                                modifier = Modifier.size(15.dp)
+                            )
+                        }
+
+                        // ── THẺ GIẢI THÍCH KỸ THUẬT & QUY ĐỊNH BẢO MẬT ANDROID ──
+                        Card(
+                            shape = RoundedCornerShape(14.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.Top
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Info,
+                                    contentDescription = null,
+                                    tint = PurpleAccent,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Column {
+                                    Text(
+                                        text = if (uiState.language == AppLanguage.VI)
+                                            "Vì sao cần mở Cài đặt máy để đổi font toàn hệ thống?"
+                                        else "Why system display settings are required?",
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = if (uiState.language == AppLanguage.VI)
+                                            "• Cỡ chữ: Android có API Settings.System.FONT_SCALE nên đổi được toàn máy tức thì.\n• Kiểu chữ: Google Android bảo vệ phân vùng /system/fonts/ để bảo mật chống giả mạo font ngân hàng/hệ thống. Mọi ứng dụng bên thứ 3 đều không thể tự ý ép đổi font của app khác mà bắt buộc người dùng chọn trong Cài đặt Phông Chữ của máy (Samsung OneUI / Xiaomi)."
+                                        else
+                                            "• Font size: Android provides Settings.System.FONT_SCALE for instant system-wide changes.\n• Font style: Google Android sandboxes system fonts for security. Third-party apps cannot force-override other apps' fonts and must route through OEM Display Settings.",
+                                        fontSize = 11.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        lineHeight = 15.sp
+                                    )
+                                }
+                            }
+                        }
+                }
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
+}
 
-    // ──────────────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────
 // Helpers
 // ──────────────────────────────────────────────────────────────────────────────
-    private fun openSystemFontSettings(context: Context) {
+private fun openSystemFontSettings(context: Context) {
+    try {
+        val intent = Intent().apply {
+            setClassName("com.android.settings", "com.samsung.settings.FontStyleActivity")
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        context.startActivity(intent)
+    } catch (_: Exception) {
         try {
             val intent = Intent().apply {
-                setClassName("com.android.settings", "com.samsung.settings.FontStyleActivity")
+                action = "com.samsung.settings.FontStyleActivity"
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
             context.startActivity(intent)
         } catch (_: Exception) {
             try {
-                val intent = Intent().apply {
-                    action = "com.samsung.settings.FontStyleActivity"
+                context.startActivity(Intent(Settings.ACTION_DISPLAY_SETTINGS).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                }
-                context.startActivity(intent)
+                })
             } catch (_: Exception) {
-                try {
-                    context.startActivity(Intent(Settings.ACTION_DISPLAY_SETTINGS).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    })
-                } catch (_: Exception) {
-                }
             }
         }
     }
+}

@@ -52,7 +52,8 @@ class FontSizeViewModel(
                         eyeTestDone = userPref.eyeTestDone,
                         eyeTestResultScale = userPref.eyeTestResultScale,
                         selectedProfileId = userPref.selectedProfileId,
-                        selectedFontName = userPref.selectedFontName
+                        selectedFontName = userPref.selectedFontName,
+                        isNotificationEnabled = userPref.isNotificationEnabled
                     )
                 }
             }
@@ -235,8 +236,7 @@ class FontSizeViewModel(
         val destination = when (index) {
             0 -> ScreenDestination.MAIN_FONT
             1 -> ScreenDestination.EYE_TEST
-            2 -> ScreenDestination.FONT_GALLERY
-            3 -> ScreenDestination.ACCESSIBILITY
+            2 -> ScreenDestination.ACCESSIBILITY
             else -> ScreenDestination.MAIN_FONT
         }
         _uiState.update {
@@ -353,14 +353,23 @@ class FontSizeViewModel(
     }
 
     /**
+     * Bật hoặc tắt tiện ích điều khiển cỡ chữ trên thanh thông báo hệ thống.
+     */
+    fun toggleNotificationControls(enabled: Boolean) {
+        _uiState.update { it.copy(isNotificationEnabled = enabled) }
+        viewModelScope.launch {
+            preferencesRepository?.setNotificationEnabled(enabled)
+        }
+    }
+
+    /**
      * Điều hướng màn hình trong ứng dụng.
      */
     fun navigateTo(destination: ScreenDestination) {
         val tab = when (destination) {
             ScreenDestination.MAIN_FONT -> 0
             ScreenDestination.EYE_TEST -> 1
-            ScreenDestination.FONT_GALLERY -> 2
-            ScreenDestination.ACCESSIBILITY -> 3
+            ScreenDestination.ACCESSIBILITY -> 2
             else -> _uiState.value.selectedTab
         }
         _uiState.update {

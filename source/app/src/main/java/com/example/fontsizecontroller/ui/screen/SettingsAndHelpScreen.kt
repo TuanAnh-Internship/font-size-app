@@ -1,5 +1,6 @@
 package com.example.fontsizecontroller.ui.screen
 
+import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import android.widget.Toast
@@ -41,6 +42,8 @@ import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.RestartAlt
+import androidx.compose.material.icons.outlined.Palette
+import com.example.fontsizecontroller.ui.theme.getFontFamilyFromName
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -87,6 +90,7 @@ fun SettingsAndHelpScreen(
     val isVi = uiState.language == AppLanguage.VI
 
     var isFamilyProfilesExpanded by remember { mutableStateOf(false) }
+    var isFontSelectorExpanded by remember { mutableStateOf(false) }
 
     BackHandler {
         viewModel.selectTab(uiState.selectedTab)
@@ -222,6 +226,187 @@ fun SettingsAndHelpScreen(
                             checked = uiState.isDarkMode,
                             onCheckedChange = { viewModel.toggleDarkMode() }
                         )
+                    }
+                }
+            }
+
+            // KHỐI: KIỂU CHỮ GIAO DIỆN (CHỈ ÁP DỤNG TRONG ỨNG DỤNG FONTM)
+            Card(
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { isFontSelectorExpanded = !isFontSelectorExpanded },
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                            Box(
+                                modifier = Modifier
+                                    .size(38.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Palette,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = if (isVi) "Kiểu Chữ Ứng Dụng" else "App Font Style",
+                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold)
+                                )
+                                Text(
+                                    text = if (isVi) 
+                                        "Đang chọn: ${uiState.selectedFontName} (Chỉ trong FontM)"
+                                    else 
+                                        "Selected: ${uiState.selectedFontName} (FontM only)",
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                )
+                            }
+                        }
+                        IconButton(onClick = { isFontSelectorExpanded = !isFontSelectorExpanded }) {
+                            Icon(
+                                imageVector = if (isFontSelectorExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    AnimatedVisibility(
+                        visible = isFontSelectorExpanded,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut()
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(top = 12.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = if (isVi)
+                                    "Chọn kiểu chữ hiển thị cho toàn bộ văn bản và nút bấm trong ứng dụng FontM:"
+                                else
+                                    "Select typography style applied to text and buttons inside FontM app:",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontSize = 12.sp
+                                )
+                            )
+
+                            val fontOptions = listOf(
+                                Triple("Roboto", if (isVi) "Mặc định hệ thống" else "Default Android", if (isVi) "Dễ nhìn, chuẩn Material" else "Clean Material standard"),
+                                Triple("Samsung One", if (isVi) "Samsung OneUI" else "Samsung OneUI", if (isVi) "Hiện đại cho máy Galaxy" else "Optimized for Galaxy"),
+                                Triple("Noto Serif", if (isVi) "Có chân (Serif)" else "Serif style", if (isVi) "Thanh lịch tựa trang sách" else "Classic book style"),
+                                Triple("Dancing Script", if (isVi) "Viết tay nghệ thuật" else "Cursive Script", if (isVi) "Mềm mại, uốn lượn" else "Soft and artistic"),
+                                Triple("Droid Sans Mono", if (isVi) "Kỹ thuật (Monospace)" else "Monospace", if (isVi) "Đơn cách lập trình" else "Programming style")
+                            )
+
+                            fontOptions.forEach { (fontName, subText, _) ->
+                                val isSelected = uiState.selectedFontName == fontName
+                                val sampleTypeface = getFontFamilyFromName(fontName)
+
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(
+                                            if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                                            else MaterialTheme.colorScheme.surface
+                                        )
+                                        .border(
+                                            width = if (isSelected) 1.5.dp else 1.dp,
+                                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                                            shape = RoundedCornerShape(12.dp)
+                                        )
+                                        .clickable {
+                                            viewModel.selectFontFamily(fontName)
+                                            Toast.makeText(
+                                                context,
+                                                if (isVi) "Đã áp dụng kiểu chữ $fontName cho FontM" else "Applied $fontName font style to FontM",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                        .padding(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Text(
+                                                text = fontName,
+                                                fontFamily = sampleTypeface,
+                                                style = MaterialTheme.typography.bodyMedium.copy(
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 15.sp,
+                                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                                )
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(
+                                                text = subText,
+                                                style = MaterialTheme.typography.labelSmall.copy(
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    fontSize = 11.sp
+                                                )
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                        Text(
+                                            text = if (isVi) "FontM 2026: Văn bản mẫu tiếng Việt" else "FontM 2026: Sample preview text",
+                                            fontFamily = sampleTypeface,
+                                            style = MaterialTheme.typography.bodySmall.copy(
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                fontSize = 12.sp
+                                            )
+                                        )
+                                    }
+                                    if (isSelected) {
+                                        Icon(
+                                            imageVector = Icons.Default.Check,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            OutlinedButton(
+                                onClick = { openSystemFontSettings(context) },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.PhoneAndroid,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = if (isVi)
+                                        "📱 Cài đặt Font chữ của máy (Toàn điện thoại)"
+                                    else
+                                        "📱 System Font Settings (Device-wide)",
+                                    fontSize = 12.sp
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -375,66 +560,163 @@ fun SettingsAndHelpScreen(
             }
 
             // KHỐI TIỆN ÍCH TRÊN THANH THÔNG BÁO (VUỐT TỪ TRÊN XUỐNG)
-            var isNotificationEnabled by remember { mutableStateOf(true) }
-
             Card(
                 shape = RoundedCornerShape(18.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(MaterialTheme.colorScheme.primaryContainer),
-                            contentAlignment = Alignment.Center
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(MaterialTheme.colorScheme.primaryContainer),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Notifications,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(14.dp))
+                            Column {
+                                Text(
+                                    text = if (isVi) "Tiện ích trên thanh thông báo" else "Notification Panel Shortcuts",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = if (isVi) "Ghim thanh chỉnh nhanh khi vuốt từ trên xuống" else "Pin quick font scale controls to notification shade",
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                )
+                            }
+                        }
+                        Switch(
+                            checked = uiState.isNotificationEnabled,
+                            onCheckedChange = { checked ->
+                                viewModel.toggleNotificationControls(checked)
+                                if (checked) {
+                                    val isGranted = com.example.fontsizecontroller.service.QuickControlNotificationManager.isNotificationPermissionGranted(context)
+                                    if (!isGranted) {
+                                        Toast.makeText(
+                                            context,
+                                            if (isVi) "⚠️ Hãy bật quyền Thông báo cho FontM trong Cài đặt máy để hiển thị nhé!" else "⚠️ Please allow Notifications in Settings to display!",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                        try {
+                                            val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                                                putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                            }
+                                            context.startActivity(intent)
+                                        } catch (_: Exception) {}
+                                    } else {
+                                        com.example.fontsizecontroller.service.QuickControlNotificationManager.showNotification(context, uiState.currentScale)
+                                        Toast.makeText(context, if (isVi) "✓ Đã ghim tiện ích! Vuốt thanh thông báo xuống để xem" else "✓ Pinned! Swipe down notification shade", Toast.LENGTH_SHORT).show()
+                                    }
+                                } else {
+                                    val nm = context.getSystemService(android.content.Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+                                    nm.cancel(com.example.fontsizecontroller.service.QuickControlNotificationManager.NOTIFICATION_ID)
+                                    Toast.makeText(context, if (isVi) "✓ Đã tắt tiện ích trên thanh thông báo" else "✓ Notification controls disabled", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Hàng nút hỗ trợ kiểm tra và cấp quyền nhanh
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = {
+                                val isGranted = com.example.fontsizecontroller.service.QuickControlNotificationManager.isNotificationPermissionGranted(context)
+                                if (!isGranted) {
+                                    Toast.makeText(
+                                        context,
+                                        if (isVi) "Chưa bật quyền thông báo! Đang mở Cài đặt..." else "Notification permission missing! Opening Settings...",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    try {
+                                        val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                                            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                        }
+                                        context.startActivity(intent)
+                                    } catch (_: Exception) {}
+                                } else {
+                                    val success = com.example.fontsizecontroller.service.QuickControlNotificationManager.showNotification(context, uiState.currentScale)
+                                    if (success) {
+                                        Toast.makeText(
+                                            context,
+                                            if (isVi) "⚡ Đã gửi thông báo! Vuốt mép trên màn hình xuống để thử" else "⚡ Sent! Swipe down shade to test",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    } else {
+                                        Toast.makeText(
+                                            context,
+                                            if (isVi) "Vui lòng kiểm tra quyền thông báo của máy" else "Please check device notification permission",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }
+                            },
+                            shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier.weight(1f)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Notifications,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(22.dp)
+                            Icon(Icons.Default.Notifications, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = if (isVi) "Gửi thử thông báo" else "Test Notification",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold
                             )
                         }
-                        Spacer(modifier = Modifier.width(14.dp))
-                        Column {
+
+                        OutlinedButton(
+                            onClick = {
+                                try {
+                                    val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                                        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                    }
+                                    context.startActivity(intent)
+                                } catch (_: Exception) {
+                                    try {
+                                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                            data = android.net.Uri.fromParts("package", context.packageName, null)
+                                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                        }
+                                        context.startActivity(intent)
+                                    } catch (_: Exception) {}
+                                }
+                            },
+                            shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(Icons.Default.PhoneAndroid, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = if (isVi) "Tiện ích trên thanh thông báo" else "Notification Panel Shortcuts",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = if (isVi) "Ghim thanh chỉnh nhanh khi vuốt từ trên xuống" else "Pin quick font scale controls to notification shade",
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                text = if (isVi) "Cài đặt quyền" else "Permissions",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold
                             )
                         }
                     }
-                    Switch(
-                        checked = isNotificationEnabled,
-                        onCheckedChange = { checked ->
-                            isNotificationEnabled = checked
-                            if (checked) {
-                                com.example.fontsizecontroller.service.QuickControlNotificationManager.showNotification(context, uiState.currentScale)
-                                Toast.makeText(context, if (isVi) "✓ Đã bật tiện ích trên thanh thông báo" else "✓ Notification controls enabled", Toast.LENGTH_SHORT).show()
-                            } else {
-                                val nm = context.getSystemService(android.content.Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
-                                nm.cancel(com.example.fontsizecontroller.service.QuickControlNotificationManager.NOTIFICATION_ID)
-                                Toast.makeText(context, if (isVi) "✓ Đã tắt tiện ích trên thanh thông báo" else "✓ Notification controls disabled", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    )
                 }
             }
 
@@ -620,6 +902,31 @@ private fun OemGuideItem(
                         )
                     )
                 }
+            }
+        }
+    }
+}
+
+private fun openSystemFontSettings(context: Context) {
+    try {
+        val intent = Intent().apply {
+            setClassName("com.android.settings", "com.samsung.settings.FontStyleActivity")
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        context.startActivity(intent)
+    } catch (_: Exception) {
+        try {
+            val intent = Intent().apply {
+                action = "com.samsung.settings.FontStyleActivity"
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            context.startActivity(intent)
+        } catch (_: Exception) {
+            try {
+                context.startActivity(Intent(Settings.ACTION_DISPLAY_SETTINGS).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                })
+            } catch (_: Exception) {
             }
         }
     }

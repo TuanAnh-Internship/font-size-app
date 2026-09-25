@@ -39,7 +39,6 @@ fun AppBottomNavigationBar(
     val items = listOf(
         NavItem("Cỡ Chữ", "Font Size", Icons.Outlined.FormatSize),
         NavItem("Đo Mắt", "Eye Test", Icons.Outlined.Visibility),
-        NavItem("Kiểu Chữ", "Gallery", Icons.Outlined.Palette),
         NavItem("Trợ Năng", "Accessibility", Icons.Outlined.Accessibility)
     )
 
