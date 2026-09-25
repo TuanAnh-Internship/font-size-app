@@ -58,11 +58,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             val uiState by viewModel.uiState.collectAsState()
 
-            LaunchedEffect(uiState.currentScale) {
-                QuickControlNotificationManager.showNotification(
-                    this@MainActivity,
-                    uiState.currentScale
-                )
+            LaunchedEffect(uiState.currentScale, uiState.isNotificationEnabled) {
+                if (uiState.isNotificationEnabled) {
+                    QuickControlNotificationManager.showNotification(
+                        this@MainActivity,
+                        uiState.currentScale
+                    )
+                }
             }
 
             val sharedBottomBar: @Composable () -> Unit = {

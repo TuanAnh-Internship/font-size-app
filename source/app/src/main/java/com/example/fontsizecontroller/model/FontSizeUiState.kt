@@ -48,5 +48,6 @@ data class FontSizeUiState(
     val eyeTestResultScale: Float = 1.0f,
     val showResetDialog: Boolean = false,
     val selectedProfileId: String = "myself",
-    val selectedFontName: String = "Roboto"
+    val selectedFontName: String = "Roboto",
+    val isNotificationEnabled: Boolean = true
 )

@@ -88,17 +88,13 @@ object QuickControlNotificationManager {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Intents cho các mốc thanh trượt
+        // Intents cho 4 mốc chọn nhanh thiết yếu
         val pScale85 = createScalePendingIntent(context, 0.85f, 201)
         val pScale100 = createScalePendingIntent(context, 1.00f, 202)
-        val pScale115 = createScalePendingIntent(context, 1.15f, 203)
-        val pScale120 = createScalePendingIntent(context, 1.20f, 204)
-        val pScale130 = createScalePendingIntent(context, 1.30f, 205)
-        val pScale150 = createScalePendingIntent(context, 1.50f, 206)
-        val pScale160 = createScalePendingIntent(context, 1.60f, 207)
-        val pScale200 = createScalePendingIntent(context, 2.00f, 208)
+        val pScale125 = createScalePendingIntent(context, 1.25f, 203)
+        val pScale150 = createScalePendingIntent(context, 1.50f, 204)
 
-        // Intents cho nút tăng / giảm
+        // Intents cho 2 nút tinh chỉnh tăng / giảm
         val pStepDown = createStepPendingIntent(context, -0.15f, 210)
         val pStepUp = createStepPendingIntent(context, 0.15f, 211)
 
@@ -107,7 +103,7 @@ object QuickControlNotificationManager {
         val activeTextColor = Color.WHITE
         val normalTextColor = Color.parseColor("#CBD5E1")
 
-        // ── 1. GIAO DIỆN THU GỌN (Collapsed View có thanh trượt & 5 mốc trực quan) ──
+        // ── 1. GIAO DIỆN THU GỌN (Collapsed View: Gọn gàng, 4 mốc chuẩn và nút - / +) ──
         val collapsedViews = RemoteViews(context.packageName, R.layout.notification_quick_control_collapsed).apply {
             setTextViewText(R.id.tv_collapsed_scale, scaleFormatted)
             setProgressBar(R.id.pb_collapsed_track, 100, progressPercent, false)
@@ -117,25 +113,21 @@ object QuickControlNotificationManager {
 
             setOnClickPendingIntent(R.id.btn_collapsed_85, pScale85)
             setOnClickPendingIntent(R.id.btn_collapsed_100, pScale100)
-            setOnClickPendingIntent(R.id.btn_collapsed_120, pScale120)
+            setOnClickPendingIntent(R.id.btn_collapsed_125, pScale125)
             setOnClickPendingIntent(R.id.btn_collapsed_150, pScale150)
-            setOnClickPendingIntent(R.id.btn_collapsed_200, pScale200)
 
-            // Highlight mốc gần nhất trên thanh trượt thu gọn
             val highlightNode = when {
                 scale <= 0.92f -> R.id.btn_collapsed_85
-                scale <= 1.10f -> R.id.btn_collapsed_100
-                scale <= 1.35f -> R.id.btn_collapsed_120
-                scale <= 1.75f -> R.id.btn_collapsed_150
-                else -> R.id.btn_collapsed_200
+                scale <= 1.12f -> R.id.btn_collapsed_100
+                scale <= 1.37f -> R.id.btn_collapsed_125
+                else -> R.id.btn_collapsed_150
             }
 
             val collapsedNodes = listOf(
                 R.id.btn_collapsed_85,
                 R.id.btn_collapsed_100,
-                R.id.btn_collapsed_120,
-                R.id.btn_collapsed_150,
-                R.id.btn_collapsed_200
+                R.id.btn_collapsed_125,
+                R.id.btn_collapsed_150
             )
             for (nodeId in collapsedNodes) {
                 if (nodeId == highlightNode) {
@@ -148,36 +140,28 @@ object QuickControlNotificationManager {
             }
         }
 
-        // ── 2. GIAO DIỆN MỞ RỘNG (Expanded View với thanh trượt và 6 mốc đầy đủ) ──
+        // ── 2. GIAO DIỆN MỞ RỘNG (Expanded View: 4 mốc lớn và 2 nút [-] Giảm / [+] Tăng) ──
         val expandedViews = RemoteViews(context.packageName, R.layout.notification_quick_control_expanded).apply {
             setTextViewText(R.id.tv_expanded_scale_badge, scaleFormatted)
             setProgressBar(R.id.pb_scale_track, 100, progressPercent, false)
 
-            // Gán sự kiện chạm vào 6 mốc trên thanh trượt
             setOnClickPendingIntent(R.id.btn_node_85, pScale85)
             setOnClickPendingIntent(R.id.btn_node_100, pScale100)
-            setOnClickPendingIntent(R.id.btn_node_115, pScale115)
-            setOnClickPendingIntent(R.id.btn_node_130, pScale130)
-            setOnClickPendingIntent(R.id.btn_node_160, pScale160)
-            setOnClickPendingIntent(R.id.btn_node_200, pScale200)
+            setOnClickPendingIntent(R.id.btn_node_125, pScale125)
+            setOnClickPendingIntent(R.id.btn_node_150, pScale150)
 
-            // Highlight mốc đang được chọn trên thanh trượt mở rộng
             val highlightExpandedNode = when {
                 scale <= 0.92f -> R.id.btn_node_85
-                scale <= 1.07f -> R.id.btn_node_100
-                scale <= 1.22f -> R.id.btn_node_115
-                scale <= 1.45f -> R.id.btn_node_130
-                scale <= 1.80f -> R.id.btn_node_160
-                else -> R.id.btn_node_200
+                scale <= 1.12f -> R.id.btn_node_100
+                scale <= 1.37f -> R.id.btn_node_125
+                else -> R.id.btn_node_150
             }
 
             val expandedNodes = listOf(
                 R.id.btn_node_85,
                 R.id.btn_node_100,
-                R.id.btn_node_115,
-                R.id.btn_node_130,
-                R.id.btn_node_160,
-                R.id.btn_node_200
+                R.id.btn_node_125,
+                R.id.btn_node_150
             )
             for (nodeId in expandedNodes) {
                 if (nodeId == highlightExpandedNode) {
@@ -189,21 +173,18 @@ object QuickControlNotificationManager {
                 }
             }
 
-            // Gán sự kiện nút tăng / giảm và nút reset / max
             setOnClickPendingIntent(R.id.btn_step_down, pStepDown)
             setOnClickPendingIntent(R.id.btn_step_up, pStepUp)
-            setOnClickPendingIntent(R.id.btn_quick_reset, pScale100)
-            setOnClickPendingIntent(R.id.btn_quick_max, pScale200)
         }
 
         return NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("⚡ Cỡ chữ nhanh: $scaleFormatted")
-            .setContentText("Thanh trượt cỡ chữ từ 0.85x đến 2.00x")
+            .setSmallIcon(R.drawable.ic_notification_font)
+            .setContentTitle("⚡ Cỡ chữ hệ thống: $scaleFormatted")
+            .setContentText("Kéo thanh thông báo để chỉnh nhanh từ 0.85x đến 1.50x")
             .setCustomContentView(collapsedViews)
             .setCustomBigContentView(expandedViews)
             .setStyle(NotificationCompat.DecoratedCustomViewStyle())
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setOngoing(true)
             .setShowWhen(false)
             .setOnlyAlertOnce(true)
@@ -211,9 +192,18 @@ object QuickControlNotificationManager {
             .build()
     }
 
-    fun showNotification(context: Context, currentScale: Float? = null) {
-        val notification = buildNotification(context, currentScale)
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(NOTIFICATION_ID, notification)
+    fun isNotificationPermissionGranted(context: Context): Boolean {
+        return androidx.core.app.NotificationManagerCompat.from(context).areNotificationsEnabled()
+    }
+
+    fun showNotification(context: Context, currentScale: Float? = null): Boolean {
+        return try {
+            val notification = buildNotification(context, currentScale)
+            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.notify(NOTIFICATION_ID, notification)
+            true
+        } catch (_: Exception) {
+            false
+        }
     }
 }

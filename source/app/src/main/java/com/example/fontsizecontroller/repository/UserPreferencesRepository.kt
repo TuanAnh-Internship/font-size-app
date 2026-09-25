@@ -29,7 +29,8 @@ data class UserPreferences(
     val eyeTestResultScale: Float = 1.0f,
     val eyeTestResultStep: Int = 3,
     val selectedProfileId: String = "myself",
-    val selectedFontName: String = "Roboto"
+    val selectedFontName: String = "Roboto",
+    val isNotificationEnabled: Boolean = true
 )
 
 interface UserPreferencesRepository {
@@ -42,6 +43,7 @@ interface UserPreferencesRepository {
     suspend fun setEyeTestResult(done: Boolean, scale: Float, step: Int)
     suspend fun setSelectedProfileId(profileId: String)
     suspend fun setSelectedFontName(fontName: String)
+    suspend fun setNotificationEnabled(enabled: Boolean)
     suspend fun resetAllPreferences()
 }
 
@@ -60,6 +62,7 @@ class UserPreferencesRepositoryImpl(
         val KEY_EYE_TEST_STEP = intPreferencesKey("key_eye_test_step")
         val KEY_SELECTED_PROFILE = stringPreferencesKey("key_selected_profile")
         val KEY_SELECTED_FONT_NAME = stringPreferencesKey("key_selected_font_name")
+        val KEY_NOTIFICATION_ENABLED = booleanPreferencesKey("key_notification_enabled")
     }
 
     override val userPreferencesFlow: Flow<UserPreferences> = context.userDataStore.data
@@ -94,6 +97,7 @@ class UserPreferencesRepositoryImpl(
             val eyeTestStep = preferences[PreferencesKeys.KEY_EYE_TEST_STEP] ?: 3
             val profileId = preferences[PreferencesKeys.KEY_SELECTED_PROFILE] ?: "myself"
             val fontName = preferences[PreferencesKeys.KEY_SELECTED_FONT_NAME] ?: "Roboto"
+            val isNotificationEnabled = preferences[PreferencesKeys.KEY_NOTIFICATION_ENABLED] ?: true
 
             UserPreferences(
                 language = language,
@@ -105,7 +109,8 @@ class UserPreferencesRepositoryImpl(
                 eyeTestResultScale = eyeTestScale,
                 eyeTestResultStep = eyeTestStep,
                 selectedProfileId = profileId,
-                selectedFontName = fontName
+                selectedFontName = fontName,
+                isNotificationEnabled = isNotificationEnabled
             )
         }
 
@@ -156,6 +161,12 @@ class UserPreferencesRepositoryImpl(
     override suspend fun setSelectedFontName(fontName: String) {
         context.userDataStore.edit { preferences ->
             preferences[PreferencesKeys.KEY_SELECTED_FONT_NAME] = fontName
+        }
+    }
+
+    override suspend fun setNotificationEnabled(enabled: Boolean) {
+        context.userDataStore.edit { preferences ->
+            preferences[PreferencesKeys.KEY_NOTIFICATION_ENABLED] = enabled
         }
     }
 
