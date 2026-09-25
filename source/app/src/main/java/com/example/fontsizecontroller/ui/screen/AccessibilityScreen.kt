@@ -20,11 +20,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.CompareArrows
 import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -178,7 +182,10 @@ fun AccessibilityScreen(
             }
 
             // 2. PHẦN TÙY CHỈNH HỆ THỐNG
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(top = 4.dp, bottom = 2.dp)
+            ) {
                 Box(
                     modifier = Modifier
                         .size(24.dp)
@@ -190,13 +197,17 @@ fun AccessibilityScreen(
                         text = "A",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF06B6D4)
+                        color = Color(0xFF06B6D4),
+                        style = TextStyle(
+                            platformStyle = PlatformTextStyle(includeFontPadding = false),
+                            textAlign = TextAlign.Center
+                        )
                     )
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = if (uiState.language == AppLanguage.VI) "TÙY CHỈNH HỆ THỐNG" else "SYSTEM ADJUSTMENTS",
-                    fontSize = 11.sp,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF06B6D4),
                     letterSpacing = 0.5.sp
@@ -209,7 +220,7 @@ fun AccessibilityScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(18.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f), RoundedCornerShape(18.dp))
             ) {
                 Row(
                     modifier = Modifier
@@ -218,7 +229,7 @@ fun AccessibilityScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
+                    Column(modifier = Modifier.weight(1f)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = if (uiState.language == AppLanguage.VI) "Chữ đậm toàn hệ thống" else "System Bold Text",
@@ -264,6 +275,8 @@ fun AccessibilityScreen(
                         }
                     }
 
+                    Spacer(modifier = Modifier.width(12.dp))
+
                     Switch(
                         checked = uiState.isBoldPreview,
                         onCheckedChange = { onToggleBold() },
@@ -281,7 +294,7 @@ fun AccessibilityScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(18.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f), RoundedCornerShape(18.dp))
             ) {
                 Row(
                     modifier = Modifier
@@ -290,7 +303,7 @@ fun AccessibilityScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = if (uiState.language == AppLanguage.VI) "Độ tương phản cao" else "High Contrast Mode",
                             fontSize = 14.sp,
@@ -307,6 +320,8 @@ fun AccessibilityScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+
+                    Spacer(modifier = Modifier.width(12.dp))
 
                     Switch(
                         checked = isHighContrastActive,
@@ -328,7 +343,7 @@ fun AccessibilityScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(18.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f), RoundedCornerShape(18.dp))
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
                     Row(
@@ -336,21 +351,12 @@ fun AccessibilityScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = "A",
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF06B6D4),
-                                fontSize = 14.sp
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = if (uiState.language == AppLanguage.VI) "Thu phóng màn hình" else "Screen Magnification",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
+                        Text(
+                            text = if (uiState.language == AppLanguage.VI) "Thu phóng màn hình" else "Screen Magnification",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
 
                         Box(
                             modifier = Modifier
@@ -399,28 +405,19 @@ fun AccessibilityScreen(
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Outlined.DarkMode,
-                                contentDescription = "Small",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(14.dp)
-                            )
+                            Text(text = "A", fontSize = 11.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text(text = "A", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(text = if (uiState.language == AppLanguage.VI) "Nhỏ" else "Small", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = "A", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color(0xFF06B6D4))
+                            Text(text = if (uiState.language == AppLanguage.VI) "Lớn" else "Large", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF06B6D4))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Icon(
-                                imageVector = Icons.Outlined.CheckCircle,
-                                contentDescription = "Recommended",
-                                tint = Color(0xFF06B6D4),
-                                modifier = Modifier.size(14.dp)
-                            )
+                            Text(text = "A", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color(0xFF06B6D4))
                         }
                     }
                 }
@@ -438,11 +435,14 @@ fun AccessibilityScreen(
                     .fillMaxWidth()
                     .height(54.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "",
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 16.sp
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(

@@ -119,12 +119,12 @@ fun FontSizeScreen(
                 )
 
                 // Thanh chọn nhanh Profile cỡ chữ gia đình (Cá nhân, Bố mẹ, Ông bà)
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
                         text = if (isVi) "Đối tượng sử dụng:" else "User:",
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                     )
                     Row(

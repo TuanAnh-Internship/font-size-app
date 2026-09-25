@@ -245,25 +245,17 @@ fun SettingsAndHelpScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                            Box(
-                                modifier = Modifier
-                                    .size(38.dp)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Palette,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
+                            Icon(
+                                imageVector = Icons.Outlined.Palette,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
+                            )
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
                                 Text(
                                     text = if (isVi) "Kiểu Chữ Ứng Dụng" else "App Font Style",
-                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold)
+                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
                                 )
                                 Text(
                                     text = if (isVi) 
@@ -278,11 +270,14 @@ fun SettingsAndHelpScreen(
                                 )
                             }
                         }
-                        IconButton(onClick = { isFontSelectorExpanded = !isFontSelectorExpanded }) {
+                        IconButton(
+                            onClick = { isFontSelectorExpanded = !isFontSelectorExpanded },
+                            modifier = Modifier.size(36.dp)
+                        ) {
                             Icon(
                                 imageVector = if (isFontSelectorExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                contentDescription = if (isFontSelectorExpanded) "Collapse" else "Expand",
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
@@ -423,6 +418,7 @@ fun SettingsAndHelpScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
                             .clickable { isFamilyProfilesExpanded = !isFamilyProfilesExpanded },
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -434,7 +430,7 @@ fun SettingsAndHelpScreen(
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(24.dp)
                             )
-                            Spacer(modifier = Modifier.width(10.dp))
+                            Spacer(modifier = Modifier.width(12.dp))
                             Column {
                                 Text(
                                     text = strings.sectionFamilyProfiles,
@@ -445,7 +441,8 @@ fun SettingsAndHelpScreen(
                                     else "Active: ${activeProfile.nameEn} (${String.format("%.2f", activeProfile.scale)}x)",
                                     style = MaterialTheme.typography.bodySmall.copy(
                                         fontSize = 11.sp,
-                                        color = MaterialTheme.colorScheme.primary
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontWeight = FontWeight.Medium
                                     )
                                 )
                             }
@@ -572,27 +569,17 @@ fun SettingsAndHelpScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(MaterialTheme.colorScheme.primaryContainer),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Notifications,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(14.dp))
+                            Icon(
+                                imageVector = Icons.Default.Notifications,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
                             Column {
                                 Text(
                                     text = if (isVi) "Tiện ích trên thanh thông báo" else "Notification Panel Shortcuts",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 15.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
@@ -637,85 +624,34 @@ fun SettingsAndHelpScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Hàng nút hỗ trợ kiểm tra và cấp quyền nhanh
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        OutlinedButton(
-                            onClick = {
-                                val isGranted = com.example.fontsizecontroller.service.QuickControlNotificationManager.isNotificationPermissionGranted(context)
-                                if (!isGranted) {
-                                    Toast.makeText(
-                                        context,
-                                        if (isVi) "Chưa bật quyền thông báo! Đang mở Cài đặt..." else "Notification permission missing! Opening Settings...",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    try {
-                                        val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-                                            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                                        }
-                                        context.startActivity(intent)
-                                    } catch (_: Exception) {}
-                                } else {
-                                    val success = com.example.fontsizecontroller.service.QuickControlNotificationManager.showNotification(context, uiState.currentScale)
-                                    if (success) {
-                                        Toast.makeText(
-                                            context,
-                                            if (isVi) "⚡ Đã gửi thông báo! Vuốt mép trên màn hình xuống để thử" else "⚡ Sent! Swipe down shade to test",
-                                            Toast.LENGTH_LONG
-                                        ).show()
-                                    } else {
-                                        Toast.makeText(
-                                            context,
-                                            if (isVi) "Vui lòng kiểm tra quyền thông báo của máy" else "Please check device notification permission",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
+                    OutlinedButton(
+                        onClick = {
+                            try {
+                                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                                    putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
                                 }
-                            },
-                            shape = RoundedCornerShape(10.dp),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Icon(Icons.Default.Notifications, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = if (isVi) "Gửi thử thông báo" else "Test Notification",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-
-                        OutlinedButton(
-                            onClick = {
+                                context.startActivity(intent)
+                            } catch (_: Exception) {
                                 try {
-                                    val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-                                        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                        data = android.net.Uri.fromParts("package", context.packageName, null)
                                         flags = Intent.FLAG_ACTIVITY_NEW_TASK
                                     }
                                     context.startActivity(intent)
-                                } catch (_: Exception) {
-                                    try {
-                                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                            data = android.net.Uri.fromParts("package", context.packageName, null)
-                                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                                        }
-                                        context.startActivity(intent)
-                                    } catch (_: Exception) {}
-                                }
-                            },
-                            shape = RoundedCornerShape(10.dp),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Icon(Icons.Default.PhoneAndroid, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = if (isVi) "Cài đặt quyền" else "Permissions",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
+                                } catch (_: Exception) {}
+                            }
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.PhoneAndroid, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = if (isVi) "Cài đặt quyền thông báo" else "Notification Permissions",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
                 }
             }
