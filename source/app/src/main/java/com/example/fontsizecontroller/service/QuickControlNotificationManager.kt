@@ -177,7 +177,13 @@ object QuickControlNotificationManager {
             setOnClickPendingIntent(R.id.btn_step_up, pStepUp)
         }
 
-        return NotificationCompat.Builder(context, CHANNEL_ID)
+        val appIconBitmap = try {
+            android.graphics.BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher)
+        } catch (_: Exception) {
+            null
+        }
+
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification_font)
             .setContentTitle("⚡ Cỡ chữ hệ thống: $scaleFormatted")
             .setContentText("Kéo thanh thông báo để chỉnh nhanh từ 0.85x đến 1.50x")
@@ -189,7 +195,12 @@ object QuickControlNotificationManager {
             .setShowWhen(false)
             .setOnlyAlertOnce(true)
             .setContentIntent(openAppPendingIntent)
-            .build()
+
+        if (appIconBitmap != null) {
+            builder.setLargeIcon(appIconBitmap)
+        }
+
+        return builder.build()
     }
 
     fun isNotificationPermissionGranted(context: Context): Boolean {
