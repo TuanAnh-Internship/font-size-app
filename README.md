@@ -37,14 +37,15 @@ Trên hệ điều hành Android, việc thay đổi cỡ chữ hệ thống th�
 ### 2. Trải nghiệm người dùng & Nâng cao (Enhancements - P1 & P2)
 - **Màn hình Giới thiệu (Onboarding Welcome Screen):** Giới thiệu trực quan giá trị ứng dụng với nút "Bắt đầu ngay" dẫn vào màn hình chính.
 - **Hỗ trợ Đa ngôn ngữ toàn ứng dụng (App-wide Localization):** Tích hợp nút chuyển đổi **`🇻🇳 VN | EN`** ngay trên Top App Bar ở tất cả các màn hình; cho phép chuyển đổi tức thì 100% nội dung (tiêu đề, thẻ thiết lập, preview, dialog, thông báo và nút bấm) giữa Tiếng Việt và Tiếng Anh trên toàn bộ ứng dụng thông qua Android String Resources (`values/` và `values-en/`).
-- **Thanh trượt mốc thông minh trên Bảng thông báo (Notification Slider Track):** Ghim thanh điều khiển trực quan khi vuốt từ mép trên màn hình xuống; gồm vạch tiến trình Gradient đo chuẩn %, 6 mốc chạm đổi kích cỡ ngay (0.85x, 1.00x, 1.15x, 1.30x, 1.60x, 2.00x) với hiệu ứng phát sáng mốc active, và 2 nút tăng/giảm vi mô mà không cần mở app.
+- **Tiện ích điều khiển nhanh trên Bảng thông báo (Notification Quick Control):** Tích hợp điều khiển trực quan ngay trên khay thông báo hệ thống; gồm 4 mốc chọn nhanh thiết yếu (**0.85x**, **1.00x**, **1.25x**, **1.50x**) kèm 2 nút bấm tăng/giảm bước nhảy vi mô (**[-] Giảm**, **[+] Tăng**) giúp điều chỉnh cỡ chữ máy tức thì mà không cần mở lại app. Tự động đồng bộ hai chiều thời gian thực giữa Notification và ứng dụng.
 - **Hồ sơ cỡ chữ gia đình (Family Profiles):** Tích hợp 3 cấu hình chuẩn (*Cá nhân 1.00x*, *Bố mẹ 1.15x*, *Ông bà 1.30x*) dạng Accordion Dropdown thu gọn/mở rộng mượt mà.
 - **Khôi phục mặc định an toàn (Reset Default 1.00x):** Nút khôi phục cỡ chữ chuẩn AOSP kèm hộp thoại xác nhận an toàn.
-- **Thư viện kiểu phông chữ tinh gọn (Single-Card Dropdown Gallery):** Thiết kế tối giản quy về 1 Card duy nhất, bộ chọn Dropdown tiện lợi, xem trước văn bản mẫu trực tiếp và áp dụng tức thì.
-- **Bài kiểm tra thị lực thông minh (Smart Reading Eye-Test):** Đo độ mỏi mắt khi đọc và đưa ra gợi ý kích thước font tối ưu.
+- **Tùy biến phông chữ ứng dụng (App Font Style in Settings):** Tích hợp bộ chọn phông chữ giao diện trực tiếp trong tab Cài Đặt & Trợ Năng với các font chữ tuyển chọn (*Roboto*, *Samsung One*, *Noto Serif*, *Dancing Script*, *Droid Sans Mono*), xem trước trực quan và áp dụng tức thì cho ứng dụng; đồng thời cung cấp nút tắt điều hướng nhanh đến Cài đặt phông chữ toàn hệ thống của thiết bị.
+- **Bài kiểm tra thị lực thông minh (Smart Reading Eye-Test):** Đo độ mỏi mắt khi đọc qua bài test 3 câu hỏi và đưa ra gợi ý kích thước font tối ưu.
+- **Thanh điều hướng tinh gọn 3 Tab (Clean 3-Tab Bottom Navigation):** Gồm **Cỡ Chữ** (Màn hình chính điều chỉnh font scale), **Đo Mắt** (Kiểm tra thị lực), và **Trợ Năng** (Chế độ đọc, hồ sơ gia đình & cài đặt phông chữ ứng dụng).
 - **Đặc quyền & Phạm vi tác động:**
   * **Cỡ chữ (Font Scale):** Tác động **TOÀN BỘ HỆ ĐIỀU HÀNH** (SMS, mạng xã hội, màn hình chính, app ngoài) thông qua `Settings.System.FONT_SCALE`.
-  * **Kiểu phông chữ (Font Typeface):** Tác động **TOÀN BỘ ỨNG DỤNG** (Tuân thủ mô hình bảo mật của Android OS và bản quyền chữ ký Samsung FlipFont).
+  * **Kiểu phông chữ (App Font Style):** Tác động **TOÀN BỘ GIAO DIỆN ỨNG DỤNG** (Tuân thủ mô hình bảo mật sandboxing của Android OS và bản quyền chữ ký Samsung FlipFont).
 
 ---
 
@@ -131,28 +132,27 @@ font-size-app/
 │   ├── architecture.md                  # Tài liệu thiết kế kiến trúc MVVM
 │   ├── ui_design.md                     # Tài liệu thiết kế giao diện, Figma link & User Flows
 │   ├── poc_results.md                   # Báo cáo kết quả kiểm thử thực nghiệm trên máy thật
+│   ├── USER_MANUAL.md                   # Sổ tay hướng dẫn sử dụng chi tiết & xử lý lỗi
 │   └── diagram/                         # Các sơ đồ kỹ thuật (Draw.io & Mermaid)
 │
 └── source/                              # Mã nguồn ứng dụng Android
     ├── deploy.ps1                       # Script tự động build, install và test qua ADB
     └── app/src/main/
-        ├── AndroidManifest.xml          # Khai báo quyền WRITE_SETTINGS
-        └── java/com/example/fontsizecontroller/
-            ├── MainActivity.kt          # Activity chính tích hợp Edge-to-Edge
-            ├── model/                   # Data models, Sealed Results & UI State
-            │   ├── FontSizeOption.kt
-            │   ├── FontSizeUiState.kt
-            │   └── FontScaleResult.kt
-            ├── repository/              # Repository truy cập Android System Settings
-            │   └── FontSettingsRepository.kt
-            ├── viewmodel/               # ViewModel điều phối StateFlow & User Actions
-            │   └── FontSizeViewModel.kt
-            ├── ui/
-            │   ├── screen/              # Các màn hình chính (FontSizeScreen, PocScreen)
-            │   ├── component/           # Các Card, Button, Dialog dùng chung
-            │   └── theme/               # MaterialTheme, Colors, Typography (.sp)
-            └── util/                    # Tiện ích ánh xạ và tính toán
-                └── FontScaleMapper.kt
+        ├── AndroidManifest.xml          # Khai báo quyền WRITE_SETTINGS, POST_NOTIFICATIONS
+        ├── java/com/example/fontsizecontroller/
+        │   ├── MainActivity.kt          # Activity chính tích hợp Edge-to-Edge
+        │   ├── model/                   # Data models, Sealed Results & UI State
+        │   ├── repository/              # Repository truy cập System Settings & DataStore
+        │   ├── service/                 # QuickControlNotificationManager & NotificationReceiver
+        │   ├── viewmodel/               # ViewModel điều phối StateFlow & User Actions
+        │   ├── ui/
+        │   │   ├── screen/              # Các màn hình (FontSizeScreen, EyeTestScreen, SettingsAndHelpScreen...)
+        │   │   ├── component/           # Các Card, Button, Dialog, BottomBar dùng chung
+        │   │   └── theme/               # MaterialTheme, Colors, Typography (hỗ trợ font động)
+        │   └── util/                    # Tiện ích ánh xạ và tính toán
+        └── res/
+            ├── layout/                  # Custom RemoteViews layout cho thanh thông báo
+            └── drawable/                # Icons & vector assets (ic_notification_font...)
 ```
 
 ---
