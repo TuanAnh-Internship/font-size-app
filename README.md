@@ -12,7 +12,7 @@
 [![TargetSdk](https://img.shields.io/badge/targetSdk-34%2F36%20(Android%2014%2B)-red.svg)](https://developer.android.com/about/versions/14)
 [![Architecture](https://img.shields.io/badge/Architecture-Clean%20MVVM-success.svg)](#-kiến-trúc-phần-mềm-architecture)
 
-> **Dự án thực tập 1 (Project 1):** Ứng dụng hỗ trợ người dùng và người cao tuổi điều chỉnh kích thước cỡ chữ, kiểm soát kiểu phông chữ và tối ưu hóa khả năng hiển thị trên toàn bộ hệ điều hành Android.
+> **Dự án thực tập 1 (Project 1):** Ứng dụng hỗ trợ người dùng và người cao tuổi điều chỉnh kích thước cỡ chữ trên toàn bộ hệ điều hành Android, đồng thời tùy biến kiểu phông chữ hiển thị cho riêng project này (ứng dụng Font Size Controller).
 
 ---
 
@@ -45,12 +45,12 @@ Trên hệ điều hành Android, việc thay đổi cỡ chữ hệ thống th�
 - **Tiện ích điều khiển nhanh trên Bảng thông báo (Notification Quick Control):** Tích hợp điều khiển trực quan ngay trên khay thông báo hệ thống; gồm 4 mốc chọn nhanh thiết yếu (**0.85x**, **1.00x**, **1.25x**, **1.50x**) kèm 2 nút bấm tăng/giảm bước nhảy vi mô (**[-] Giảm**, **[+] Tăng**) giúp điều chỉnh cỡ chữ máy tức thì mà không cần mở lại app. Tự động đồng bộ hai chiều thời gian thực giữa Notification và ứng dụng.
 - **Hồ sơ cỡ chữ gia đình (Family Profiles):** Tích hợp 3 cấu hình chuẩn (*Cá nhân 1.00x*, *Bố mẹ 1.15x*, *Ông bà 1.30x*) dạng Accordion Dropdown thu gọn/mở rộng mượt mà.
 - **Khôi phục mặc định an toàn (Reset Default 1.00x):** Nút khôi phục cỡ chữ chuẩn AOSP kèm hộp thoại xác nhận an toàn.
-- **Tùy biến phông chữ ứng dụng (App Font Style in Settings):** Tích hợp bộ chọn phông chữ giao diện trực tiếp trong tab Cài Đặt & Trợ Năng với các font chữ tuyển chọn (*Roboto*, *Samsung One*, *Noto Serif*, *Dancing Script*, *Droid Sans Mono*), xem trước trực quan và áp dụng tức thì cho ứng dụng; đồng thời cung cấp nút tắt điều hướng nhanh đến Cài đặt phông chữ toàn hệ thống của thiết bị.
+- **Tùy biến phông chữ nội bộ (App Font Style in Settings):** Tích hợp bộ chọn phông chữ giao diện trực tiếp trong tab Cài Đặt & Trợ Năng với các font chữ tuyển chọn (*Roboto*, *Samsung One*, *Noto Serif*, *Dancing Script*, *Droid Sans Mono*), xem trước trực quan và áp dụng tức thì cho **riêng project này (ứng dụng Font Size Controller)**; đồng thời cung cấp nút tắt điều hướng nhanh đến Cài đặt phông chữ toàn hệ thống của thiết bị nếu người dùng muốn đổi font máy.
 - **Bài kiểm tra thị lực thông minh (Smart Reading Eye-Test):** Đo độ mỏi mắt khi đọc qua bài test 3 câu hỏi và đưa ra gợi ý kích thước font tối ưu.
-- **Thanh điều hướng tinh gọn 3 Tab (Clean 3-Tab Bottom Navigation):** Gồm **Cỡ Chữ** (Màn hình chính điều chỉnh font scale), **Đo Mắt** (Kiểm tra thị lực), và **Trợ Năng** (Chế độ đọc, hồ sơ gia đình & cài đặt phông chữ ứng dụng).
+- **Thanh điều hướng tinh gọn 3 Tab (Clean 3-Tab Bottom Navigation):** Gồm **Cỡ Chữ** (Màn hình chính điều chỉnh font scale), **Đo Mắt** (Kiểm tra thị lực), và **Trợ Năng** (Chế độ đọc, hồ sơ gia đình & cài đặt phông chữ nội bộ ứng dụng).
 - **Đặc quyền & Phạm vi tác động:**
   * **Cỡ chữ (Font Scale):** Tác động **TOÀN BỘ HỆ ĐIỀU HÀNH** (SMS, mạng xã hội, màn hình chính, app ngoài) thông qua `Settings.System.FONT_SCALE`.
-  * **Kiểu phông chữ (App Font Style):** Tác động **TOÀN BỘ GIAO DIỆN ỨNG DỤNG** (Tuân thủ mô hình bảo mật sandboxing của Android OS và bản quyền chữ ký Samsung FlipFont).
+  * **Kiểu phông chữ (App Font Style):** Chỉ áp dụng nội bộ cho **PROJECT NÀY (FONT SIZE CONTROLLER)**, hoàn toàn không can thiệp phông chữ hệ thống hay các ứng dụng khác (tuân thủ nghiêm ngặt mô hình bảo mật App Sandboxing của Android OS và bản quyền chữ ký Samsung FlipFont).
 
 ---
 
