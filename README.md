@@ -3,7 +3,6 @@
 [![Release](https://img.shields.io/github/v/release/TuanAnh-Internship/font-size-app?style=for-the-badge&logo=github&color=2ea44f&label=Release)](https://github.com/TuanAnh-Internship/font-size-app/releases/latest)
 [![Download APK](https://img.shields.io/badge/Download_APK-FontM_v1.0.0-success?style=for-the-badge&logo=android&logoColor=white&color=3DDC84)](https://github.com/TuanAnh-Internship/font-size-app/releases/download/v1.0.0/FontM-v1.0.0-release.apk)
 [![Android CI](https://github.com/TuanAnh-Internship/font-size-app/actions/workflows/android.yml/badge.svg)](https://github.com/TuanAnh-Internship/font-size-app/actions/workflows/android.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 <br>
 
 [![Platform](https://img.shields.io/badge/Platform-Android-green.svg)](https://developer.android.com)
