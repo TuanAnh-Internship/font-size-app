@@ -26,5 +26,5 @@ jobs:
         run: chmod +x source/gradlew
 
       - name: Run Unit Tests & Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace --no-daemon
+        run: ./gradlew testDebugUnitTest assembleDebug --stacktrace --no-daemon
         working-directory: source
