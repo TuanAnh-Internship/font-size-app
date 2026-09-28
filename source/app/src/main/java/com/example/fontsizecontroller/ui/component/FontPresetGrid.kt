@@ -39,6 +39,8 @@ fun FontPresetGrid(
     onSelect: (FontSizeOption) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = if (language == AppLanguage.VI) "Chọn cỡ chữ mong muốn" else "Choose Target Font Size",
@@ -80,7 +82,10 @@ fun FontPresetGrid(
                                 color = if (isSelected) PurpleAccent else MaterialTheme.colorScheme.outline,
                                 shape = RoundedCornerShape(16.dp)
                             )
-                            .clickable { onSelect(option) }
+                            .clickable {
+                                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+                                onSelect(option)
+                            }
                     ) {
                         Column(
                             modifier = Modifier.padding(14.dp),

@@ -74,6 +74,7 @@ fun FontSizeScreen(
     val scrollState = rememberScrollState()
     val strings = LocalizedStrings.get(uiState.language)
     val isVi = uiState.language == AppLanguage.VI
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
 
     Scaffold(
         topBar = {
@@ -140,7 +141,10 @@ fun FontSizeScreen(
                                     .background(
                                         if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
                                     )
-                                    .clickable { onSelectProfile(profile.id, profile.scale) }
+                                    .clickable {
+                                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+                                        onSelectProfile(profile.id, profile.scale)
+                                    }
                                     .padding(vertical = 8.dp, horizontal = 4.dp),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -198,7 +202,10 @@ fun FontSizeScreen(
                         kotlin.math.abs(uiState.selectedOption.scale - uiState.currentScale) < 0.01f
 
                 Button(
-                    onClick = onApply,
+                    onClick = {
+                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                        onApply()
+                    },
                     enabled = !uiState.isApplying && !isCurrentPreset,
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
@@ -226,7 +233,10 @@ fun FontSizeScreen(
 
                 // Nút phụ "Đặt lại mặc định (1.00x)"
                 OutlinedButton(
-                    onClick = onResetDefault,
+                    onClick = {
+                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+                        onResetDefault()
+                    },
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -268,7 +278,10 @@ fun FontSizeScreen(
             },
             confirmButton = {
                 Button(
-                    onClick = onConfirmReset,
+                    onClick = {
+                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                        onConfirmReset()
+                    },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Text(text = strings.btnConfirm, fontWeight = FontWeight.Bold)
