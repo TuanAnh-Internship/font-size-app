@@ -9,6 +9,7 @@ sealed interface ApplyUiResult {
     data class Success(val scale: Float, val label: String) : ApplyUiResult
     data class Error(val message: String? = null) : ApplyUiResult
     data object Unsupported : ApplyUiResult
+    data class SecurityBlocked(val message: String, val isMdmRestricted: Boolean = false) : ApplyUiResult
 }
 
 /**
@@ -44,10 +45,19 @@ data class FontSizeUiState(
     val readingMode: ReadingMode = ReadingMode.STANDARD,
     val isBoldPreview: Boolean = false,
     val showOemFallbackDialog: Boolean = false,
+    val oemDialogReason: String? = null,
+    val isMdmBlocked: Boolean = false,
     val eyeTestDone: Boolean = false,
     val eyeTestResultScale: Float = 1.0f,
     val showResetDialog: Boolean = false,
     val selectedProfileId: String = "myself",
     val selectedFontName: String = "Roboto",
-    val isNotificationEnabled: Boolean = true
+    val isNotificationEnabled: Boolean = true,
+    val isNightScheduleEnabled: Boolean = false,
+    val nightScheduleScale: Float = 1.25f,
+    val nightScheduleStartHour: Int = 20,
+    val nightScheduleStartMinute: Int = 0,
+    val nightScheduleEndHour: Int = 7,
+    val nightScheduleEndMinute: Int = 0,
+    val isBatteryOptimizationIgnored: Boolean = true
 )

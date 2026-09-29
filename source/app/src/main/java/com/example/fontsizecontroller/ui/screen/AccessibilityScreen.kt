@@ -84,6 +84,8 @@ fun AccessibilityScreen(
     onToggleBold: () -> Unit,
     onSelectScale: (FontSizeOption) -> Unit,
     onApplyScale: () -> Unit = {},
+    onToggleNightSchedule: (Boolean, Float) -> Unit = { _, _ -> },
+    onSetNightScheduleScale: (Float) -> Unit = {},
     onOpenSettings: () -> Unit,
     onToggleLanguage: () -> Unit,
     onToggleDarkMode: () -> Unit,
@@ -109,9 +111,8 @@ fun AccessibilityScreen(
         label = "animatedAccessibilityScale"
     )
 
-    // Trạng thái Hẹn giờ ban đêm
-    var isNightScheduleEnabled by remember { mutableStateOf(false) }
-    var nightScheduleScale by remember { mutableFloatStateOf(1.25f) }
+    val isNightScheduleEnabled = uiState.isNightScheduleEnabled
+    val nightScheduleScale = uiState.nightScheduleScale
 
     // Trạng thái Kính lúp đọc nhanh
     var showCameraLoupeDialog by remember { mutableStateOf(false) }
@@ -546,7 +547,7 @@ fun AccessibilityScreen(
                             checked = isNightScheduleEnabled,
                             onCheckedChange = { checked ->
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                isNightScheduleEnabled = checked
+                                onToggleNightSchedule(checked, nightScheduleScale)
                                 Toast.makeText(
                                     context,
                                     if (checked) {
@@ -609,7 +610,7 @@ fun AccessibilityScreen(
                                             )
                                             .clickable {
                                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                                nightScheduleScale = scale
+                                                onSetNightScheduleScale(scale)
                                             }
                                             .padding(vertical = 8.dp),
                                         contentAlignment = Alignment.Center
@@ -623,6 +624,44 @@ fun AccessibilityScreen(
                                             lineHeight = 14.sp
                                         )
                                     }
+                                }
+                            }
+
+                            // Gợi ý cấp quyền chạy ngầm nếu chưa cấp
+                            val isBatteryOptimized = remember {
+                                !com.example.fontsizecontroller.util.OemCompatibilityHelper.isBatteryOptimizationIgnored(context)
+                            }
+                            if (isBatteryOptimized) {
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f))
+                                        .padding(horizontal = 10.dp, vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = if (isVi) "🔋 Cho phép chạy ngầm để giờ hẹn chuẩn hơn" else "🔋 Allow background run for on-time alarms",
+                                        fontSize = 11.sp,
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = if (isVi) "Bật ngay" else "Enable",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = PurpleAccent,
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(PurpleAccent.copy(alpha = 0.15f))
+                                            .clickable {
+                                                com.example.fontsizecontroller.util.OemCompatibilityHelper.requestIgnoreBatteryOptimization(context)
+                                            }
+                                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    )
                                 }
                             }
                         }

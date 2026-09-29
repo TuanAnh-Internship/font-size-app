@@ -161,6 +161,12 @@ class MainActivity : ComponentActivity() {
                             onToggleBold = { viewModel.toggleBoldPreview() },
                             onSelectScale = { viewModel.selectOption(it) },
                             onApplyScale = { viewModel.applySelectedScale() },
+                            onToggleNightSchedule = { enabled, scale ->
+                                viewModel.toggleNightSchedule(this@MainActivity, enabled, scale)
+                            },
+                            onSetNightScheduleScale = { scale ->
+                                viewModel.setNightScheduleScale(this@MainActivity, scale)
+                            },
                             onOpenSettings = { viewModel.navigateTo(ScreenDestination.SETTINGS_AND_HELP) },
                             onToggleLanguage = { viewModel.toggleLanguage() },
                             onToggleDarkMode = { viewModel.toggleDarkMode() },

@@ -1,5 +1,6 @@
 package com.example.fontsizecontroller.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fontsizecontroller.model.AppLanguage
@@ -53,7 +54,13 @@ class FontSizeViewModel(
                         eyeTestResultScale = userPref.eyeTestResultScale,
                         selectedProfileId = userPref.selectedProfileId,
                         selectedFontName = userPref.selectedFontName,
-                        isNotificationEnabled = userPref.isNotificationEnabled
+                        isNotificationEnabled = userPref.isNotificationEnabled,
+                        isNightScheduleEnabled = userPref.isNightScheduleEnabled,
+                        nightScheduleScale = userPref.nightScheduleScale,
+                        nightScheduleStartHour = userPref.nightScheduleStartHour,
+                        nightScheduleStartMinute = userPref.nightScheduleStartMinute,
+                        nightScheduleEndHour = userPref.nightScheduleEndHour,
+                        nightScheduleEndMinute = userPref.nightScheduleEndMinute
                     )
                 }
             }
@@ -158,7 +165,21 @@ class FontSizeViewModel(
                         it.copy(
                             isApplying = false,
                             result = ApplyUiResult.Unsupported,
-                            showOemFallbackDialog = true
+                            showOemFallbackDialog = true,
+                            oemDialogReason = null,
+                            isMdmBlocked = false
+                        )
+                    }
+                }
+
+                is FontScaleApplyResult.SecurityBlocked -> {
+                    _uiState.update {
+                        it.copy(
+                            isApplying = false,
+                            result = ApplyUiResult.SecurityBlocked(result.message, result.isMdmRestricted),
+                            showOemFallbackDialog = true,
+                            oemDialogReason = result.message,
+                            isMdmBlocked = result.isMdmRestricted
                         )
                     }
                 }
@@ -226,7 +247,74 @@ class FontSizeViewModel(
      * Đóng hộp thoại hướng dẫn OEM Fallback.
      */
     fun dismissOemFallbackDialog() {
-        _uiState.update { it.copy(showOemFallbackDialog = false) }
+        _uiState.update {
+            it.copy(
+                showOemFallbackDialog = false,
+                oemDialogReason = null,
+                isMdmBlocked = false
+            )
+        }
+    }
+
+    /**
+     * Bật/tắt lịch hẹn tự động phóng to chữ ban đêm (Scheduled Font Scale).
+     */
+    fun toggleNightSchedule(context: Context, enabled: Boolean, scale: Float = _uiState.value.nightScheduleScale) {
+        _uiState.update {
+            it.copy(isNightScheduleEnabled = enabled, nightScheduleScale = scale)
+        }
+        viewModelScope.launch {
+            preferencesRepository?.setNightSchedule(
+                enabled = enabled,
+                scale = scale,
+                startHour = _uiState.value.nightScheduleStartHour,
+                startMinute = _uiState.value.nightScheduleStartMinute,
+                endHour = _uiState.value.nightScheduleEndHour,
+                endMinute = _uiState.value.nightScheduleEndMinute
+            )
+        }
+        if (enabled) {
+            com.example.fontsizecontroller.service.FontScheduleManager.scheduleNightMode(
+                context = context,
+                nightScale = scale,
+                dayScale = _uiState.value.currentScale ?: 1.00f,
+                startHour = _uiState.value.nightScheduleStartHour,
+                startMinute = _uiState.value.nightScheduleStartMinute,
+                endHour = _uiState.value.nightScheduleEndHour,
+                endMinute = _uiState.value.nightScheduleEndMinute
+            )
+        } else {
+            com.example.fontsizecontroller.service.FontScheduleManager.cancelNightMode(context)
+        }
+    }
+
+    /**
+     * Cập nhật cỡ chữ mong muốn cho lịch hẹn ban đêm.
+     */
+    fun setNightScheduleScale(context: Context, scale: Float) {
+        _uiState.update { it.copy(nightScheduleScale = scale) }
+        viewModelScope.launch {
+            preferencesRepository?.setNightScheduleScale(scale)
+        }
+        if (_uiState.value.isNightScheduleEnabled) {
+            com.example.fontsizecontroller.service.FontScheduleManager.scheduleNightMode(
+                context = context,
+                nightScale = scale,
+                dayScale = _uiState.value.currentScale ?: 1.00f,
+                startHour = _uiState.value.nightScheduleStartHour,
+                startMinute = _uiState.value.nightScheduleStartMinute,
+                endHour = _uiState.value.nightScheduleEndHour,
+                endMinute = _uiState.value.nightScheduleEndMinute
+            )
+        }
+    }
+
+    /**
+     * Cập nhật trạng thái miễn trừ tối ưu hóa pin (Battery Optimization Whitelist).
+     */
+    fun updateBatteryOptimizationStatus(context: Context) {
+        val isIgnored = com.example.fontsizecontroller.util.OemCompatibilityHelper.isBatteryOptimizationIgnored(context)
+        _uiState.update { it.copy(isBatteryOptimizationIgnored = isIgnored) }
     }
 
     /**

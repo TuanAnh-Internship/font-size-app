@@ -30,7 +30,13 @@ data class UserPreferences(
     val eyeTestResultStep: Int = 3,
     val selectedProfileId: String = "myself",
     val selectedFontName: String = "Roboto",
-    val isNotificationEnabled: Boolean = true
+    val isNotificationEnabled: Boolean = true,
+    val isNightScheduleEnabled: Boolean = false,
+    val nightScheduleScale: Float = 1.25f,
+    val nightScheduleStartHour: Int = 20,
+    val nightScheduleStartMinute: Int = 0,
+    val nightScheduleEndHour: Int = 7,
+    val nightScheduleEndMinute: Int = 0
 )
 
 interface UserPreferencesRepository {
@@ -44,6 +50,15 @@ interface UserPreferencesRepository {
     suspend fun setSelectedProfileId(profileId: String)
     suspend fun setSelectedFontName(fontName: String)
     suspend fun setNotificationEnabled(enabled: Boolean)
+    suspend fun setNightSchedule(
+        enabled: Boolean,
+        scale: Float = 1.25f,
+        startHour: Int = 20,
+        startMinute: Int = 0,
+        endHour: Int = 7,
+        endMinute: Int = 0
+    )
+    suspend fun setNightScheduleScale(scale: Float)
     suspend fun resetAllPreferences()
 }
 
@@ -63,6 +78,12 @@ class UserPreferencesRepositoryImpl(
         val KEY_SELECTED_PROFILE = stringPreferencesKey("key_selected_profile")
         val KEY_SELECTED_FONT_NAME = stringPreferencesKey("key_selected_font_name")
         val KEY_NOTIFICATION_ENABLED = booleanPreferencesKey("key_notification_enabled")
+        val KEY_NIGHT_SCHEDULE_ENABLED = booleanPreferencesKey("key_night_schedule_enabled")
+        val KEY_NIGHT_SCHEDULE_SCALE = floatPreferencesKey("key_night_schedule_scale")
+        val KEY_NIGHT_SCHEDULE_START_HOUR = intPreferencesKey("key_night_schedule_start_hour")
+        val KEY_NIGHT_SCHEDULE_START_MINUTE = intPreferencesKey("key_night_schedule_start_minute")
+        val KEY_NIGHT_SCHEDULE_END_HOUR = intPreferencesKey("key_night_schedule_end_hour")
+        val KEY_NIGHT_SCHEDULE_END_MINUTE = intPreferencesKey("key_night_schedule_end_minute")
     }
 
     override val userPreferencesFlow: Flow<UserPreferences> = context.userDataStore.data
@@ -98,6 +119,12 @@ class UserPreferencesRepositoryImpl(
             val profileId = preferences[PreferencesKeys.KEY_SELECTED_PROFILE] ?: "myself"
             val fontName = preferences[PreferencesKeys.KEY_SELECTED_FONT_NAME] ?: "Roboto"
             val isNotificationEnabled = preferences[PreferencesKeys.KEY_NOTIFICATION_ENABLED] ?: true
+            val isNightScheduleEnabled = preferences[PreferencesKeys.KEY_NIGHT_SCHEDULE_ENABLED] ?: false
+            val nightScheduleScale = preferences[PreferencesKeys.KEY_NIGHT_SCHEDULE_SCALE] ?: 1.25f
+            val nightScheduleStartHour = preferences[PreferencesKeys.KEY_NIGHT_SCHEDULE_START_HOUR] ?: 20
+            val nightScheduleStartMinute = preferences[PreferencesKeys.KEY_NIGHT_SCHEDULE_START_MINUTE] ?: 0
+            val nightScheduleEndHour = preferences[PreferencesKeys.KEY_NIGHT_SCHEDULE_END_HOUR] ?: 7
+            val nightScheduleEndMinute = preferences[PreferencesKeys.KEY_NIGHT_SCHEDULE_END_MINUTE] ?: 0
 
             UserPreferences(
                 language = language,
@@ -110,7 +137,13 @@ class UserPreferencesRepositoryImpl(
                 eyeTestResultStep = eyeTestStep,
                 selectedProfileId = profileId,
                 selectedFontName = fontName,
-                isNotificationEnabled = isNotificationEnabled
+                isNotificationEnabled = isNotificationEnabled,
+                isNightScheduleEnabled = isNightScheduleEnabled,
+                nightScheduleScale = nightScheduleScale,
+                nightScheduleStartHour = nightScheduleStartHour,
+                nightScheduleStartMinute = nightScheduleStartMinute,
+                nightScheduleEndHour = nightScheduleEndHour,
+                nightScheduleEndMinute = nightScheduleEndMinute
             )
         }
 
@@ -167,6 +200,30 @@ class UserPreferencesRepositoryImpl(
     override suspend fun setNotificationEnabled(enabled: Boolean) {
         context.userDataStore.edit { preferences ->
             preferences[PreferencesKeys.KEY_NOTIFICATION_ENABLED] = enabled
+        }
+    }
+
+    override suspend fun setNightSchedule(
+        enabled: Boolean,
+        scale: Float,
+        startHour: Int,
+        startMinute: Int,
+        endHour: Int,
+        endMinute: Int
+    ) {
+        context.userDataStore.edit { preferences ->
+            preferences[PreferencesKeys.KEY_NIGHT_SCHEDULE_ENABLED] = enabled
+            preferences[PreferencesKeys.KEY_NIGHT_SCHEDULE_SCALE] = scale
+            preferences[PreferencesKeys.KEY_NIGHT_SCHEDULE_START_HOUR] = startHour
+            preferences[PreferencesKeys.KEY_NIGHT_SCHEDULE_START_MINUTE] = startMinute
+            preferences[PreferencesKeys.KEY_NIGHT_SCHEDULE_END_HOUR] = endHour
+            preferences[PreferencesKeys.KEY_NIGHT_SCHEDULE_END_MINUTE] = endMinute
+        }
+    }
+
+    override suspend fun setNightScheduleScale(scale: Float) {
+        context.userDataStore.edit { preferences ->
+            preferences[PreferencesKeys.KEY_NIGHT_SCHEDULE_SCALE] = scale
         }
     }
 
