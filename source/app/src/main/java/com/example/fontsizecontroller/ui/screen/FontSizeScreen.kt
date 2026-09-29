@@ -295,12 +295,14 @@ fun FontSizeScreen(
         )
     }
 
-    // Hiển thị hộp thoại hướng dẫn OEM Fallback nếu ROM nhà sản xuất chặn ghi ngầm
+    // Hiển thị hộp thoại hướng dẫn OEM Fallback nếu ROM nhà sản xuất hoặc chính sách MDM chặn ghi ngầm
     if (uiState.showOemFallbackDialog) {
         OemFallbackDialog(
             language = uiState.language,
             onOpenDisplaySettings = onOpenDisplaySettings,
-            onDismiss = onDismissOemDialog
+            onDismiss = onDismissOemDialog,
+            isMdmRestricted = uiState.isMdmBlocked,
+            reason = uiState.oemDialogReason
         )
     }
 }

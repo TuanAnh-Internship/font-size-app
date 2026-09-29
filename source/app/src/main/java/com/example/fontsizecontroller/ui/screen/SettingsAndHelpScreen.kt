@@ -721,6 +721,131 @@ fun SettingsAndHelpScreen(
                 }
             }
 
+            // KHỐI 3B: TỐI ƯU HÓA PIN & TỰ KHỞI CHẠY (OEM BATTERY WHITELIST)
+            Card(
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+            ) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    val isBatteryIgnored = remember(uiState) {
+                        com.example.fontsizecontroller.util.OemCompatibilityHelper.isBatteryOptimizationIgnored(context)
+                    }
+                    val deviceName = remember {
+                        com.example.fontsizecontroller.util.OemCompatibilityHelper.getFriendlyDeviceName()
+                    }
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.PhoneAndroid,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column {
+                            Text(
+                                text = if (isVi) "Chạy Ngầm & Chống Tắt Ứng Dụng" else "Background & Battery Whitelist",
+                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+                            )
+                            Text(
+                                text = "${if (isVi) "Thiết bị:" else "Device:"} $deviceName",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontSize = 11.sp
+                                )
+                            )
+                        }
+                    }
+
+                    // Badge trạng thái pin
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(
+                                if (isBatteryIgnored) Color(0xFF2E7D32).copy(alpha = 0.12f)
+                                else Color(0xFFED6C02).copy(alpha = 0.12f)
+                            )
+                            .padding(horizontal = 12.dp, vertical = 10.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = if (isBatteryIgnored) Icons.Default.Check else Icons.Default.Info,
+                                contentDescription = null,
+                                tint = if (isBatteryIgnored) Color(0xFF2E7D32) else Color(0xFFED6C02),
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = if (isBatteryIgnored) {
+                                    if (isVi) "✓ Đã cho phép chạy ngầm (Lịch hẹn & thông báo hoạt động ổn định nhất)"
+                                    else "✓ Battery optimization ignored (Alarms & shortcuts work reliably)"
+                                } else {
+                                    if (isVi) "⚠️ Đang bị tối ưu pin (Hãng máy có thể tắt ngầm lịch hẹn cỡ chữ ban đêm)"
+                                    else "⚠️ Battery restricted (ROM may kill background night schedules)"
+                                },
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = if (isBatteryIgnored) Color(0xFF1B5E20) else Color(0xFFE65100),
+                                lineHeight = 16.sp
+                            )
+                        }
+                    }
+
+                    Text(
+                        text = if (isVi)
+                            "Các dòng máy Xiaomi HyperOS/MIUI, Samsung One UI, Oppo ColorOS có cơ chế tiết kiệm pin rất mạnh. Để tính năng hẹn giờ ban đêm và thanh điều khiển hoạt động chính xác 100%, bạn nên cho phép FontM chạy nền không hạn chế."
+                        else
+                            "Aggressive OEM battery savers (Xiaomi, Samsung, Oppo) can kill background schedulers. Whitelist FontM to ensure night reading schedules activate on time.",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            lineHeight = 18.sp
+                        )
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Nút yêu cầu bỏ tối ưu pin
+                        Button(
+                            onClick = {
+                                com.example.fontsizecontroller.util.OemCompatibilityHelper.requestIgnoreBatteryOptimization(context)
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Text(
+                                text = if (isVi) "Bỏ Tối Ưu Pin ↗" else "Unrestrict Battery ↗",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+
+                        // Nút mở quản lý tự khởi chạy
+                        OutlinedButton(
+                            onClick = {
+                                val opened = com.example.fontsizecontroller.util.OemCompatibilityHelper.openOemAutostartSettings(context)
+                                if (!opened) {
+                                    Toast.makeText(context, if (isVi) "Đã mở thông tin ứng dụng" else "Opened App Info", Toast.LENGTH_SHORT).show()
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(
+                                text = if (isVi) "Quản Lý Khởi Chạy ↗" else "Autostart Manager ↗",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+                }
+            }
+
             // KHỐI 4: THÔNG TIN ỨNG DỤNG & RESET TOÀN BỘ
             Card(
                 shape = RoundedCornerShape(18.dp),

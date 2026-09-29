@@ -23,6 +23,15 @@ sealed interface FontScaleApplyResult {
     data object Unsupported : FontScaleApplyResult
 
     /**
+     * Bị chặn bởi chính sách bảo mật doanh nghiệp (Device Policy Manager / MDM) hoặc hệ thống từ chối quyền can thiệp.
+     */
+    data class SecurityBlocked(
+        val message: String,
+        val isMdmRestricted: Boolean = false,
+        val throwable: Throwable? = null
+    ) : FontScaleApplyResult
+
+    /**
      * Xảy ra ngoại lệ hoặc lỗi hệ thống không lường trước.
      */
     data class Error(val throwable: Throwable? = null) : FontScaleApplyResult

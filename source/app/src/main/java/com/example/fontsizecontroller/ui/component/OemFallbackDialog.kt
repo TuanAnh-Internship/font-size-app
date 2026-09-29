@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,8 +35,13 @@ import com.example.fontsizecontroller.ui.theme.PurpleAccent
 fun OemFallbackDialog(
     language: AppLanguage,
     onOpenDisplaySettings: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    isMdmRestricted: Boolean = false,
+    reason: String? = null
 ) {
+    val isVi = language == AppLanguage.VI
+    val deviceName = remember { com.example.fontsizecontroller.util.OemCompatibilityHelper.getFriendlyDeviceName() }
+
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = {
@@ -43,20 +49,27 @@ fun OemFallbackDialog(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(14.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                    .background(
+                        if (isMdmRestricted) MaterialTheme.colorScheme.errorContainer
+                        else MaterialTheme.colorScheme.surfaceVariant
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Info,
-                    contentDescription = "OEM Notice",
-                    tint = PurpleAccent,
+                    contentDescription = "OEM / MDM Notice",
+                    tint = if (isMdmRestricted) MaterialTheme.colorScheme.error else PurpleAccent,
                     modifier = Modifier.size(26.dp)
                 )
             }
         },
         title = {
             Text(
-                text = if (language == AppLanguage.VI) "Xác Nhận Trên Thiết Bị" else "Device Confirmation",
+                text = if (isMdmRestricted) {
+                    if (isVi) "Chính Sách Bảo Mật Thiết Bị" else "Device Security Policy"
+                } else {
+                    if (isVi) "Xác Nhận Trên $deviceName" else "Device Confirmation"
+                },
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -66,18 +79,35 @@ fun OemFallbackDialog(
         text = {
             Column {
                 Text(
-                    text = if (language == AppLanguage.VI)
-                        "Hệ điều hành của máy bạn (như Xiaomi MIUI/HyperOS, hoặc một số ROM tùy biến) có cơ chế bảo mật riêng, yêu cầu bạn xác nhận trực tiếp trong mục Cài đặt Màn hình của hệ thống."
-                    else
-                        "Your device manufacturer ROM (e.g. Xiaomi MIUI/HyperOS) requires you to directly confirm font scaling inside the System Display Settings.",
+                    text = if (isMdmRestricted) {
+                        if (isVi)
+                            "Thiết bị của bạn đang chịu sự kiểm soát của chính sách bảo mật doanh nghiệp (MDM/Work Profile) hoặc hệ thống khóa quyền ghi cài đặt. Bạn có thể mở cài đặt màn hình của máy để tự điều chỉnh thủ công."
+                        else
+                            "This device is restricted by an Enterprise Device Policy (MDM/Work Profile). Please use the System Display Settings to adjust font scale manually."
+                    } else {
+                        if (isVi)
+                            "Hệ điều hành của máy bạn ($deviceName) có cơ chế bảo vệ riêng, yêu cầu bạn xác nhận trực tiếp trong mục Cài đặt Màn hình của hệ thống."
+                        else
+                            "Your device ROM ($deviceName) requires you to directly confirm font scaling inside the System Display Settings."
+                    },
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         lineHeight = 20.sp
                     )
                 )
+                if (reason != null) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = "Chi tiết: $reason",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = MaterialTheme.colorScheme.outline,
+                            fontSize = 11.sp
+                        )
+                    )
+                }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = if (language == AppLanguage.VI)
+                    text = if (isVi)
                         "💡 Bấm nút bên dưới để mở ngay màn hình Cài đặt của máy chỉ với 1 chạm."
                     else
                         "💡 Tap below to open Display Settings directly in 1 click.",

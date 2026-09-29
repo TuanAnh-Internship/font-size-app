@@ -21,6 +21,7 @@ fun StatusMessage(
     val containerColor = when (result) {
         is ApplyUiResult.Success -> MaterialTheme.colorScheme.primaryContainer
         is ApplyUiResult.Error, ApplyUiResult.Unsupported -> MaterialTheme.colorScheme.errorContainer
+        is ApplyUiResult.SecurityBlocked -> MaterialTheme.colorScheme.errorContainer
         ApplyUiResult.PermissionRequired -> MaterialTheme.colorScheme.tertiaryContainer
         ApplyUiResult.Idle -> MaterialTheme.colorScheme.surfaceVariant
     }
@@ -28,6 +29,7 @@ fun StatusMessage(
     val message = when (result) {
         is ApplyUiResult.Success -> "Đã áp dụng cỡ chữ thành công"
         is ApplyUiResult.Error -> result.message ?: "Đã xảy ra lỗi"
+        is ApplyUiResult.SecurityBlocked -> "Bị chặn bởi chính sách bảo mật thiết bị (MDM / OEM)"
         ApplyUiResult.Unsupported -> "Hệ thống không hỗ trợ scale này"
         ApplyUiResult.PermissionRequired -> "Cần cấp quyền WRITE_SETTINGS"
         ApplyUiResult.Idle -> ""

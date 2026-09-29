@@ -85,7 +85,16 @@ class SystemFontSettingsRepositoryImpl(
                 FontScaleApplyResult.Unsupported
             }
         } catch (e: SecurityException) {
-            FontScaleApplyResult.PermissionRequired
+            val isMdm = com.example.fontsizecontroller.util.OemCompatibilityHelper.isDevicePolicyRestricted(context)
+            if (canWriteSettings()) {
+                FontScaleApplyResult.SecurityBlocked(
+                    message = e.message ?: "Chính sách bảo mật hệ thống hoặc quản trị thiết bị (MDM) chặn thay đổi cài đặt",
+                    isMdmRestricted = isMdm,
+                    throwable = e
+                )
+            } else {
+                FontScaleApplyResult.PermissionRequired
+            }
         } catch (e: Settings.SettingNotFoundException) {
             FontScaleApplyResult.Error(e)
         } catch (e: Exception) {
