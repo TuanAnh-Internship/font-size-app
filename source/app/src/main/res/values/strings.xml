@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">FontM</string>
     <string name="app_full_name">FontM - Thay đổi phông chữ , kích cỡ</string>
+    <string name="quick_settings_tile_label">Cỡ chữ FontM</string>
 </resources>
