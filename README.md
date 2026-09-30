@@ -1,7 +1,8 @@
 # Font Size Controller (FontM) — Android Utility & Accessibility App
 
-[![Release](https://img.shields.io/badge/Release-v1.1.0_Official-2ea44f?style=for-the-badge&logo=github&logoColor=white)](https://github.com/TuanAnh-Internship/font-size-app/releases/latest)
-[![Download APK](https://img.shields.io/badge/Download_APK-FontM_v1.1.0-success?style=for-the-badge&logo=android&logoColor=white&color=3DDC84)](source/app/build/outputs/apk/release/FontM-v1.0.0-release.apk)
+[![Release](https://img.shields.io/badge/Release-v1.1.0_Latest-2ea44f?style=for-the-badge&logo=github&logoColor=white)](https://github.com/TuanAnh-Internship/font-size-app/releases/tag/v1.1.0)
+[![Download APK](https://img.shields.io/badge/Download_APK-FontM_v1.1.0-success?style=for-the-badge&logo=android&logoColor=white&color=3DDC84)](https://github.com/TuanAnh-Internship/font-size-app/releases/download/v1.1.0/FontM-v1.1.0-release.apk)
+[![Direct APK Download](https://img.shields.io/badge/Direct_APK-Download-blue?style=for-the-badge&logo=googlechrome&logoColor=white)](https://github.com/TuanAnh-Internship/font-size-app/releases/download/v1.1.0/FontM-v1.1.0-release.apk)
 [![Unit Tests](https://img.shields.io/badge/Tests-36%2F36_Passed-brightgreen?style=for-the-badge&logo=junit5)](source/app/src/test/)
 <br>
 
@@ -115,11 +116,11 @@ Trên hệ điều hành Android, việc thay đổi cỡ chữ hệ thống th�
   .\gradlew.bat assembleRelease
   ```
   File APK phát hành chính thức:
-  `source/app/build/outputs/apk/release/FontM-v1.0.0-release.apk` (Dung lượng: ~4.16 MB).
+  `source/app/build/outputs/apk/release/FontM-v1.1.0-release.apk` (Dung lượng: ~4.16 MB).
 
 * **Cài đặt trực tiếp lên thiết bị Android:**
   ```powershell
-  adb install -r "source/app/build/outputs/apk/release/FontM-v1.0.0-release.apk"
+  adb install -r "source/app/build/outputs/apk/release/FontM-v1.1.0-release.apk"
   adb shell am start -n com.example.fontsizecontroller/.MainActivity
   ```
 
