@@ -89,11 +89,24 @@ sealed interface ScreenState {
 
 ---
 
-## 4. Compose Components Structure
+## 4. Compose Components Structure (Phiên bản v1.0.0)
 
-- `FontSizeScreen.kt`: Container điều phối chính
-- `FontPresetCard.kt`: Thẻ chọn từng mức font
-- `FontPreviewCard.kt`: Khung xem trước trực quan
-- `StatusMessage.kt`: Phản hồi trạng thái
-- `PermissionDialog.kt`: Hộp thoại yêu cầu quyền hệ thống
-- `PocScreen.kt`: Màn hình kiểm nghiệm thực địa
+### 4.1. Màn hình (Screens)
+- `FontSizeScreen.kt`: Container điều phối chính Tab Cỡ Chữ (Live Preview, Presets, Custom Slider, Family Profiles)
+- `EyeTestScreen.kt`: Tab Đo Mắt (Quy trình 3 bước Snellen, phân tích độ thoải mái thị giác, nút 1 chạm áp dụng)
+- `AccessibilityScreen.kt`: Tab Trợ Năng (Chữ đậm, tương phản cao, phóng to màn hình, hẹn giờ, kính lúp)
+- `SettingsAndHelpScreen.kt`: Cài đặt phông chữ nội bộ, chuyển đổi ngôn ngữ, Dark Theme, chẩn đoán OEM
+- `OnboardingScreen.kt`: Màn hình chào mừng người dùng mới
+- `PermissionScreen.kt`: Hướng dẫn cấp quyền `WRITE_SETTINGS` an toàn
+- `ResultScreen.kt`: Thông báo thành công và xác nhận thay đổi font toàn hệ thống
+- `UnsupportedErrorScreen.kt`: Hộp thoại hướng dẫn dự phòng khi thiết bị hạn chế ghi ngầm
+
+### 4.2. Thành phần dùng chung (Reusable Components)
+- `AppBottomNavigationBar.kt`: Thanh điều hướng 3 Tab chuẩn Material 3
+- `TopAppBarWithLanguage.kt`: Thanh tiêu đề với nút chuyển đổi song ngữ (`🇻🇳 VI ⇄ 🇬🇧 EN`) và Dark Mode
+- `RealCameraLoupeDialog.kt`: Kính lúp camera thật tích hợp CameraX (zoom 1x-5x, đèn flash, nút Pause Frame)
+- `NightScheduleCard.kt`: Thẻ thiết lập hẹn giờ phóng to chữ ban đêm (20:00 - 07:00)
+- `CameraLoupeSection.kt`: Thẻ kích hoạt kính lúp trợ năng
+- `OemDiagnosticsCard.kt`: Thẻ chẩn đoán thiết bị và hướng dẫn tắt tối ưu hóa pin ngầm
+- `FontPresetCard.kt` & `FontPreviewCard.kt`: Thẻ chọn mốc cỡ chữ và khung xem trước trực quan
+- `StatusMessage.kt`: Phản hồi trạng thái thao tác

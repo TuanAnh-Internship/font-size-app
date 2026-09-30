@@ -44,21 +44,26 @@ Giải pháp
 - **UG-05:** Tôi muốn nhận thông báo rõ ràng sau khi thao tác.
 - **UG-06 (mở rộng):** Nếu tôi không biết chọn mức nào, tôi muốn được ứng dụng gợi ý.
 
-## 5. Feature List
+## 5. Feature List (Danh mục tính năng hoàn thiện v1.0.0)
 
-| ID | Feature | Ưu tiên | Mô tả |
-|---|---|---|---|
-| P1-F01 | Current Font Status | Must-have | Hiển thị trạng thái/cỡ chữ hiện tại |
-| P1-F02 | Font Size Selection | Must-have | Cho người dùng chọn một preset dễ hiểu |
-| P1-F03 | Preview | Must-have | Xem trước thay đổi trong app trước khi Apply |
-| P1-F04 | Apply | Must-have | Bắt đầu luồng áp dụng sau xác nhận của người dùng |
-| P1-F05 | Permission Handling | Must-have | Kiểm tra và hướng dẫn quyền hệ thống khi cần |
-| P1-F06 | Result Feedback | Must-have | Thông báo success/failure/guidance |
-| P1-F07 | Reset Default | Nice-to-have | Quay về mức mặc định nếu phạm vi cho phép |
-| P1-F08 | Remember Last Choice | Nice-to-have | Lưu lựa chọn gần nhất nếu UX cần |
-| P1-F09 | System Bold Text | Proposed v2 | Công tắc bật/tắt chữ đậm toàn hệ thống tăng khả năng đọc |
-| P1-F10 | Font Style Gallery | Proposed v2 | Bộ sưu tập phông chữ đa dạng (Serif, Sans-serif, Cursive) |
-| P1-AI01 | Smart Font Recommendation | Proposed AI | Bài test đọc thị lực hỗ trợ gợi ý mức font và chữ đậm tối ưu |
+| ID | Feature | Trạng thái | Mô tả |
+|---|---|:---:|---|
+| P1-F01 | Current Font Status | **Đã hoàn thành** | Đọc và hiển thị chính xác trạng thái/cỡ chữ hiện tại |
+| P1-F02 | Font Size Selection | **Đã hoàn thành** | Lựa chọn 4 Preset hoặc thanh trượt Custom vi mô |
+| P1-F03 | Preview | **Đã hoàn thành** | Xem trước trực tiếp theo đơn vị `.sp` trước khi Apply |
+| P1-F04 | Apply | **Đã hoàn thành** | Ghi cài đặt an toàn và bắt buộc verify đọc lại |
+| P1-F05 | Permission Handling | **Đã hoàn thành** | Kiểm tra `canWrite()` và điều hướng mở Cài đặt quyền |
+| P1-F06 | Result Feedback | **Đã hoàn thành** | Thông báo thành công, thất bại, hoặc hướng dẫn lỗi OEM |
+| P1-F07 | Reset Default | **Đã hoàn thành** | Hộp thoại an toàn khôi phục cỡ chữ chuẩn 1.00x |
+| P1-F08 | Family Profiles | **Đã hoàn thành** | 3 hồ sơ định hình sẵn (Cá nhân 1.00x, Bố mẹ 1.20x, Ông bà 1.45x) |
+| P1-F09 | System Bold Text | **Đã hoàn thành** | Chế độ xem trước chữ đậm và liên kết cài đặt máy |
+| P1-F10 | Font Style Gallery | **Đã hoàn thành** | Thư viện phông chữ nội bộ (Roboto, Samsung One, Noto Serif...) |
+| P1-AI01 | Smart Vision Test | **Đã hoàn thành** | Trắc nghiệm thị lực 3 bước với động cơ chẩn đoán và gợi ý font tự động |
+| P1-F11 | Scheduled Night Font | **Đã hoàn thành** | Hẹn giờ tự động phóng to chữ buổi tối (20:00 - 07:00) qua AlarmManager |
+| P1-F12 | Quick Camera Loupe | **Đã hoàn thành** | Kính lúp CameraX zoom 2x-5x, đèn flash, giữ yên hình và lọc tương phản |
+| P1-F13 | Quick Settings Tile | **Đã hoàn thành** | Phím tắt cạnh Wi-Fi đổi nhanh 3 mốc font chỉ với 1 chạm |
+| P1-F14 | Haptic Feedback | **Đã hoàn thành** | Rung phản hồi vật lý khi chạm nút/thanh trượt đạt chuẩn WCAG AAA |
+| P1-F15 | App-wide Localization| **Đã hoàn thành** | Chuyển đổi song ngữ tức thì `🇻🇳 VI ⇄ 🇬🇧 EN` không cần restart |
 
 ## 6. Functional Requirements
 

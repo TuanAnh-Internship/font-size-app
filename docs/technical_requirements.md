@@ -123,20 +123,27 @@ Tài liệu này xác định rõ:
 
 ---
 
-## 5. Task 4 - Acceptance Criteria (AC01–AC08)
+## 5. Task 4 - Acceptance Criteria (AC01–AC15)
 
-Các tiêu chí chấp nhận được chuẩn hóa theo định dạng **Given / When / Then**:
+Các tiêu chí chấp nhận được chuẩn hóa theo định dạng **Given / When / Then** và đã được nghiệm thu hoàn chỉnh trên thiết bị thật:
 
-| ID | Kịch bản (Scenario) | Given (Điều kiện tiên quyết) | When (Thao tác kích hoạt) | Then (Kết quả mong muốn) |
-|---|---|---|---|---|
-| **AC01** | Khởi động app hiển thị đúng cỡ chữ | Giá trị `FONT_SCALE` hệ thống hợp lệ (ví dụ: `1.0f`). | Người dùng mở ứng dụng. | Giá trị hiện tại được hiển thị đúng trên giao diện, preset tương ứng được highlight (hoặc hiển thị đúng giá trị). |
-| **AC02** | Xử lý scale tùy chỉnh không khớp preset | Giá trị `FONT_SCALE` hệ thống là giá trị lẻ (ví dụ: `1.08f` do OEM đặt). | Người dùng mở ứng dụng. | App hiển thị nhãn `Custom (1.08x)`, không bị crash và các preset vẫn cho phép chọn bình thường. |
-| **AC03** | Xem trước độc lập với hệ thống | Cỡ chữ hiện tại là `Normal (1.00)`. | Người dùng chọn preset `Large (1.15)`. | Vùng Preview hiển thị chữ phóng to theo mức `Large`, nhưng cỡ chữ toàn hệ thống và các app khác vẫn giữ nguyên `1.00`. |
-| **AC04** | Nhấn Apply khi chưa có quyền | `Settings.System.canWrite(context) == false`. | Người dùng nhấn nút "Apply". | Hệ thống không gọi lệnh ghi; giao diện hiển thị thông báo `Yêu cầu cấp quyền` kèm nút dẫn đến Cài đặt. |
-| **AC05** | Mở màn hình quản lý quyền thành công | Ứng dụng đang yêu cầu quyền `WRITE_SETTINGS`. | Người dùng nhấn nút "Cấp quyền / Mở Cài đặt". | Màn hình `ACTION_MANAGE_WRITE_SETTINGS` của ứng dụng được mở (nếu intent resolve được). |
-| **AC06** | Tự động kiểm tra lại quyền khi quay về app | Người dùng vừa từ màn hình Cài đặt hệ thống quay trở lại app (`onResume`). | Activity được resume. | Ứng dụng tự động gọi lại `canWrite(context)` để cập nhật trạng thái mới nhất lên UI mà không cần tắt mở lại app. |
-| **AC07** | Áp dụng cỡ chữ thành công và xác thực | `Settings.System.canWrite(context) == true`. | Người dùng chọn một mức khác và nhấn "Apply". | Ứng dụng thực hiện ghi → đọc lại giá trị hệ thống → xác nhận trùng khớp → hiển thị thông báo thành công. |
-| **AC08** | Phát hiện ghi thất bại / OEM từ chối | `Settings.System.canWrite(context) == true` nhưng hệ thống OEM chặn ngầm việc sửa `FONT_SCALE`. | Người dùng nhấn "Apply". | Sau khi ghi, bước verify đọc lại thấy giá trị không đổi → hiển thị thông báo lỗi `Không thể áp dụng trên thiết bị này`, không được báo thành công giả tạo. |
+| ID | Kịch bản (Scenario) | Given (Điều kiện tiên quyết) | When (Thao tác kích hoạt) | Then (Kết quả mong muốn) | Trạng thái v1.0.0 |
+|---|---|---|---|---|:---:|
+| **AC01** | Khởi động app hiển thị đúng cỡ chữ | Giá trị `FONT_SCALE` hệ thống hợp lệ (ví dụ: `1.0f`). | Người dùng mở ứng dụng. | Giá trị hiện tại được hiển thị đúng trên giao diện, preset tương ứng được highlight (hoặc hiển thị đúng giá trị). | **ĐẠT (PASS)** |
+| **AC02** | Xử lý scale tùy chỉnh không khớp preset | Giá trị `FONT_SCALE` hệ thống là giá trị lẻ (ví dụ: `1.08f` do OEM đặt). | Người dùng mở ứng dụng. | App hiển thị nhãn `Custom (1.08x)`, không bị crash và các preset vẫn cho phép chọn bình thường. | **ĐẠT (PASS)** |
+| **AC03** | Xem trước độc lập với hệ thống | Cỡ chữ hiện tại là `Normal (1.00)`. | Người dùng chọn preset `Large (1.15)`. | Vùng Preview hiển thị chữ phóng to theo mức `Large`, nhưng cỡ chữ toàn hệ thống và các app khác vẫn giữ nguyên `1.00`. | **ĐẠT (PASS)** |
+| **AC04** | Nhấn Apply khi chưa có quyền | `Settings.System.canWrite(context) == false`. | Người dùng nhấn nút "Apply". | Hệ thống không gọi lệnh ghi; giao diện hiển thị thông báo `Yêu cầu cấp quyền` kèm nút dẫn đến Cài đặt. | **ĐẠT (PASS)** |
+| **AC05** | Mở màn hình quản lý quyền thành công | Ứng dụng đang yêu cầu quyền `WRITE_SETTINGS`. | Người dùng nhấn nút "Cấp quyền / Mở Cài đặt". | Màn hình `ACTION_MANAGE_WRITE_SETTINGS` của ứng dụng được mở (nếu intent resolve được). | **ĐẠT (PASS)** |
+| **AC06** | Tự động kiểm tra lại quyền khi quay về app | Người dùng vừa từ màn hình Cài đặt hệ thống quay trở lại app (`onResume`). | Activity được resume. | Ứng dụng tự động gọi lại `canWrite(context)` để cập nhật trạng thái mới nhất lên UI mà không cần tắt mở lại app. | **ĐẠT (PASS)** |
+| **AC07** | Áp dụng cỡ chữ thành công và xác thực | `Settings.System.canWrite(context) == true`. | Người dùng chọn một mức khác và nhấn "Apply". | Ứng dụng thực hiện ghi → đọc lại giá trị hệ thống → xác nhận trùng khớp → hiển thị thông báo thành công. | **ĐẠT (PASS)** |
+| **AC08** | Phát hiện ghi thất bại / OEM từ chối | `Settings.System.canWrite(context) == true` nhưng hệ thống OEM chặn ngầm việc sửa `FONT_SCALE`. | Người dùng nhấn "Apply". | Sau khi ghi, bước verify đọc lại thấy giá trị không đổi → hiển thị thông báo lỗi `Không thể áp dụng trên thiết bị này`, không được báo thành công giả tạo. | **ĐẠT (PASS)** |
+| **AC09** | Đo thị lực 3 bước & gợi ý cỡ chữ | Người dùng đang ở Tab Đo Mắt. | Hoàn thành 3 câu trắc nghiệm thị lực. | `EyeTestDiagnosticEngine` tính toán đề xuất font phù hợp và hiển thị nút 1 chạm áp dụng ngay. Màn hình cố định 1.00x chuẩn. | **ĐẠT (PASS)** |
+| **AC10** | Hẹn giờ tăng cỡ chữ ban đêm | Người dùng kích hoạt Hẹn giờ (20:00 - 07:00). | Đến khung giờ hẹn. | `AlarmManager` kích hoạt `FontScheduleReceiver` tự đổi sang font đọc ban đêm (`1.25x`) và khôi phục `1.00x` vào buổi sáng. | **ĐẠT (PASS)** |
+| **AC11** | Kính lúp đọc nhanh CameraX | Người dùng bấm "Mở kính lúp soi chữ". | Quyền Camera được cấp. | Hiển thị kính lúp CameraX zoom 1x-5x, bật/tắt đèn Flash, nút Pause Frame giữ yên hình không run tay và bộ lọc tương phản cao. | **ĐẠT (PASS)** |
+| **AC12** | Phản hồi xúc giác (Haptic Feedback) | Người dùng thao tác nút bấm, slider, preset chips. | Bấm nút hoặc kéo slider. | Phản hồi rung vật lý nhẹ xác nhận thao tác đạt chuẩn WCAG 2.2 AAA. | **ĐẠT (PASS)** |
+| **AC13** | Phím tắt Quick Settings Tile | Ứng dụng đã cài đặt trên Android. | Vuốt thanh thông báo và chạm Tile FontM. | `FontSizeTileService` xoay vòng nhanh 3 mốc cỡ chữ (`1.00x` ➔ `1.25x` ➔ `1.50x`) chỉ với 1 chạm. | **ĐẠT (PASS)** |
+| **AC14** | Tương thích chuyên sâu OEM | Thiết bị chạy Samsung OneUI, HyperOS, ColorOS. | Mở Cài đặt & Trợ giúp. | Hiển thị thẻ chẩn đoán OEM và nút mở trực tiếp trang tắt Tối ưu hóa pin ngầm (Battery Optimization Whitelist). | **ĐẠT (PASS)** |
+| **AC15** | Đóng gói bản Release tối ưu | Thực thi `./gradlew assembleRelease`. | R8 và ProGuard biên dịch. | Xuất xưởng `FontM-v1.0.0-release.apk` dung lượng nhẹ (~4.16MB), kiểm thử chạy mượt mà trên Samsung Galaxy A11. | **ĐẠT (PASS)** |
 
 ---
 

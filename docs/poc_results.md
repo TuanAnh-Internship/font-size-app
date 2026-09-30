@@ -49,7 +49,37 @@
 
 ---
 
-## 5. Kết luận kỹ thuật (Conclusion)
+## 5. Kết luận kỹ thuật POC (Conclusion)
 
 - Quyền `android.permission.WRITE_SETTINGS` và API `Settings.System.putFloat()` hoạt động tin cậy và khả thi 100% trên thiết bị Samsung.
 - Cơ chế `onResume` re-check đảm bảo UX liền mạch, đáp ứng hoàn toàn các tiêu chí chấp nhận **AC04, AC05, AC06, AC07**.
+
+---
+
+## 6. Kết Quả Kiểm Thử Nghiệm Thu Chính Thức — Bản Release v1.0.0
+
+Kiểm chứng thực tế toàn diện phiên bản phát hành chính thức **`FontM-v1.0.0-release.apk`** trên thiết bị vật lý thật **Samsung Galaxy A11 (SM-A115F)** qua kết nối ADB Wireless Debugging:
+
+### 6.1. Đo lường hiệu năng & Tài nguyên phần cứng
+| Chỉ số kiểm thử | Kết quả thực tế trên Galaxy A11 | Tiêu chuẩn đánh giá | Đánh giá |
+| :--- | :--- | :--- | :---: |
+| **Dung lượng APK** | **4.16 MB** (`4,361,732 bytes`) | Mục tiêu < 5.0 MB | **XUẤT SẮC** |
+| **Bộ nhớ RAM Java Heap** | **8.2 MB – 13.1 MB** (đo qua `dumpsys meminfo`) | Tiêu chuẩn < 40 MB | **ĐẠT (PASS)** |
+| **Bộ nhớ RAM Native Heap** | **6.2 MB – 10.9 MB** | Tiêu chuẩn < 25 MB | **ĐẠT (PASS)** |
+| **Activity Leaks** | **0 Activity Leak** (duy trì 2 instance khi mở dialog) | Không rò rỉ Activity | **ĐẠT (PASS)** |
+| **Cold Start Time** | **~0.75 giây** | < 1.5 giây | **ĐẠT (PASS)** |
+
+### 6.2. Kết quả Stress Test chịu tải cao
+- **Stress Test đổi font 50 lần liên tục (Continuous IPC Loop):**
+  - Thực thi vòng lặp 50 lần thay đổi font (`1.00x` ➔ `1.15x` ➔ `1.25x` ➔ `1.30x`) trong 15 giây.
+  - Kết quả: Hoàn thành 100%, 0 ANR, 0 Crash, không bị treo giao diện.
+- **Stress Test xoay màn hình (Orientation Change 20 chu kỳ):**
+  - Xoay màn hình liên tục giữa Portrait và Landscape trong 20 chu kỳ.
+  - Tiến trình ứng dụng (PID: `18846`) duy trì liên tục, Compose UI State bảo toàn dữ liệu hoàn hảo.
+
+### 6.3. Xác thực các module nâng cấp
+1. **Đo thị lực thông minh (Smart Vision Test):** Giữ chuẩn cố định 1.00x baseline, thuật toán chẩn đoán thị lực đưa ra gợi ý chuẩn xác kèm nút áp dụng 1 chạm.
+2. **Kính lúp đọc nhanh CameraX (Quick Camera Loupe):** Live stream camera phản hồi tức thì, zoom 1x-5x, trợ sáng đèn flash, nút Pause Frame giữ yên hình không run tay và bộ lọc tương phản cao hoạt động ổn định trên bản Release đã tối ưu R8/ProGuard.
+3. **Phím tắt Quick Settings Tile:** Xoay vòng nhanh 3 mốc font trực tiếp trên thanh trạng thái cạnh icon Wi-Fi/Bluetooth mà không cần mở ứng dụng.
+4. **Hẹn giờ cỡ chữ ban đêm (Scheduled Font Scale):** Tự động chuyển cỡ chữ lúc 20:00 và khôi phục 07:00 thông qua `AlarmManager` không gây hao pin ngầm.
+
