@@ -93,41 +93,14 @@ fun EyeTestScreen(
     // Câu trả lời cho Bước 2 (Bảng Snellen: dòng nhỏ nhất đọc rõ): 0 = Dòng 1 (Cỡ lớn), 1 = Dòng 2 (Cỡ vừa), 2 = Dòng 3 (Cỡ nhỏ)
     var step2Answer by remember { mutableIntStateOf(1) }
 
-    // Thuật toán tính toán đề xuất dựa trên kết hợp cả 2 câu hỏi:
-    val recommendedScale = remember(step1Answer, step2Answer) {
-        when {
-            // Bước 2 chỉ đọc được dòng lớn nhất -> Mắt yếu / lão thị cần phóng to mạnh
-            step2Answer == 0 -> if (step1Answer == 0) 1.45f else 1.35f
-            // Bước 2 đọc được dòng vừa -> Cần phóng to nhẹ hoặc vừa
-            step2Answer == 1 -> if (step1Answer == 0) 1.25f else 1.15f
-            // Bước 2 đọc rõ cả dòng nhỏ -> Mắt sáng
-            else -> if (step1Answer == 0) 1.15f else if (step1Answer == 2) 0.85f else 1.00f
-        }
+    // Đánh giá thị lực tự động qua EyeTestDiagnosticEngine (Clean Architecture)
+    val diagnosticResult = remember(step1Answer, step2Answer, isVi) {
+        com.example.fontsizecontroller.domain.EyeTestDiagnosticEngine.evaluate(step1Answer, step2Answer, isVi)
     }
-
-    val recommendedLabel = String.format(java.util.Locale.US, "Cỡ %.2fx", recommendedScale)
-
-    // Phân loại đơn giản, gần gũi cho người dùng
-    val diagnosticCategory = when {
-        recommendedScale >= 1.35f -> if (isVi) "Nên dùng chữ to để mắt thư giãn" else "Larger text recommended for eye comfort"
-        recommendedScale >= 1.15f -> if (isVi) "Nên tăng nhẹ cỡ chữ khi đọc nhiều" else "Slightly larger text helps ease eye strain"
-        else -> if (isVi) "Mắt nhìn rất tốt, cỡ chữ hiện tại đã vừa" else "Sharp vision, default font size is ideal"
-    }
-
-    val diagnosticAdvice = when {
-        recommendedScale >= 1.35f -> if (isVi)
-            "Mắt bạn đọc chữ nhỏ sẽ nhanh mỏi. Cỡ chữ $recommendedLabel giúp bạn đọc tin tức, nhắn tin thoải mái mà không phải đưa điện thoại sát mắt."
-        else
-            "Reading fine print strains your eyes quickly. Scale $recommendedLabel lets you read messages and news comfortably without holding the phone too close."
-        recommendedScale >= 1.15f -> if (isVi)
-            "Mắt bạn đọc lâu có thể hơi mỏi. Mức $recommendedLabel giúp chữ rõ nét, đọc êm mắt mà bố cục màn hình vẫn gọn gàng."
-        else
-            "Your eyes may tire during long reading sessions. Scale $recommendedLabel improves clarity while keeping the screen neat."
-        else -> if (isVi)
-            "Mắt bạn nhìn rất khỏe và rõ. Cỡ chữ $recommendedLabel là mức chuẩn tự nhiên, hiển thị trọn vẹn mọi ứng dụng."
-        else
-            "Your eyesight is sharp and healthy. Scale $recommendedLabel is the natural standard size for all apps."
-    }
+    val recommendedScale = diagnosticResult.recommendedScale
+    val recommendedLabel = diagnosticResult.recommendedLabel
+    val diagnosticCategory = diagnosticResult.category
+    val diagnosticAdvice = diagnosticResult.advice
 
     val progressPercent = currentStep / 3f
 
