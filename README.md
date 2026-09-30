@@ -1,7 +1,7 @@
 # Font Size Controller (FontM) — Android Utility & Accessibility App
 
-[![Release](https://img.shields.io/badge/Release-v1.0.0_Official-2ea44f?style=for-the-badge&logo=github&logoColor=white)](https://github.com/TuanAnh-Internship/font-size-app/releases/latest)
-[![Download APK](https://img.shields.io/badge/Download_APK-FontM_v1.0.0-success?style=for-the-badge&logo=android&logoColor=white&color=3DDC84)](source/app/build/outputs/apk/release/FontM-v1.0.0-release.apk)
+[![Release](https://img.shields.io/badge/Release-v1.1.0_Official-2ea44f?style=for-the-badge&logo=github&logoColor=white)](https://github.com/TuanAnh-Internship/font-size-app/releases/latest)
+[![Download APK](https://img.shields.io/badge/Download_APK-FontM_v1.1.0-success?style=for-the-badge&logo=android&logoColor=white&color=3DDC84)](source/app/build/outputs/apk/release/FontM-v1.0.0-release.apk)
 [![Unit Tests](https://img.shields.io/badge/Tests-36%2F36_Passed-brightgreen?style=for-the-badge&logo=junit5)](source/app/src/test/)
 <br>
 
