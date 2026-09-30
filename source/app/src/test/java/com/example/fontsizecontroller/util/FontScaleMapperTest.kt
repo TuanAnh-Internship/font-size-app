@@ -91,4 +91,28 @@ class FontScaleMapperTest {
         val label = FontScaleMapper.toDisplayLabel(1.05f, presets)
         assertEquals("Custom (1.05x)", label)
     }
+
+    @Test
+    fun `extreme boundary 0_50x becomes Custom`() {
+        val option = FontScaleMapper.toOption(0.50f, presets)
+        assertNull(option)
+        val label = FontScaleMapper.toDisplayLabel(0.50f, presets)
+        assertEquals("Custom (0.50x)", label)
+    }
+
+    @Test
+    fun `extreme boundary 2_00x becomes Custom`() {
+        val option = FontScaleMapper.toOption(2.00f, presets)
+        assertNull(option)
+        val label = FontScaleMapper.toDisplayLabel(2.00f, presets)
+        assertEquals("Custom (2.00x)", label)
+    }
+
+    @Test
+    fun `extreme boundary 3_00x becomes Custom`() {
+        val option = FontScaleMapper.toOption(3.00f, presets)
+        assertNull(option)
+        val label = FontScaleMapper.toDisplayLabel(3.00f, presets)
+        assertEquals("Custom (3.00x)", label)
+    }
 }
