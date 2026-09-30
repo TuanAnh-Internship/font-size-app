@@ -20,9 +20,9 @@ object OemCompatibilityHelper {
     /**
      * Tên hãng sản xuất chuẩn hóa
      */
-    val manufacturer: String = Build.MANUFACTURER.uppercase(Locale.US)
-    val brand: String = Build.BRAND.uppercase(Locale.US)
-    val model: String = Build.MODEL
+    val manufacturer: String = (Build.MANUFACTURER ?: "UNKNOWN").uppercase(Locale.US)
+    val brand: String = (Build.BRAND ?: "UNKNOWN").uppercase(Locale.US)
+    val model: String = Build.MODEL ?: "Device"
 
     val isXiaomi: Boolean = manufacturer.contains("XIAOMI") || brand.contains("REDMI") || brand.contains("POCO")
     val isSamsung: Boolean = manufacturer.contains("SAMSUNG")
@@ -40,7 +40,12 @@ object OemCompatibilityHelper {
             isOppoOrRealme -> "Oppo / Realme (ColorOS)"
             isVivo -> "Vivo (Funtouch OS / OriginOS)"
             isHuawei -> "Huawei / Honor (EMUI / MagicOS)"
-            else -> "${Build.MANUFACTURER.replaceFirstChar { it.uppercase() }} $model"
+            else -> {
+                val mfg = (Build.MANUFACTURER ?: "Android").replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString()
+                }
+                "$mfg $model"
+            }
         }
     }
 

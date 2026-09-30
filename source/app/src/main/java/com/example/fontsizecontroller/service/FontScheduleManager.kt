@@ -108,9 +108,10 @@ object FontScheduleManager {
     /**
      * Tính toán mốc thời gian kích hoạt kế tiếp (hôm nay hoặc ngày mai).
      */
-    private fun calculateNextTriggerMillis(hour: Int, minute: Int): Long {
-        val now = Calendar.getInstance()
+    internal fun calculateNextTriggerMillis(hour: Int, minute: Int, nowMillis: Long = System.currentTimeMillis()): Long {
+        val now = Calendar.getInstance().apply { timeInMillis = nowMillis }
         val target = Calendar.getInstance().apply {
+            timeInMillis = nowMillis
             set(Calendar.HOUR_OF_DAY, hour)
             set(Calendar.MINUTE, minute)
             set(Calendar.SECOND, 0)

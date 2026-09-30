@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">FontM</string>
+    <string name="app_full_name">FontM - System Font &amp; Size Controller</string>
+    <string name="quick_settings_tile_label">FontM Size</string>
+    <string name="quick_settings_tile_desc">Tap to cycle font scale</string>
+    <string name="notification_channel_name">Quick Font Scale Shortcuts</string>
+    <string name="notification_channel_desc">Shows quick font scale adjustment bar in notifications</string>
+    <string name="notification_title">FontM - Font Controller</string>
+    <string name="notification_current_scale">Current scale: %s</string>
+    <string name="oem_fallback_dialog_title">Manual adjustment required</string>
+    <string name="camera_loupe_title">Accessibility Magnifier</string>
+    <string name="night_schedule_alarm_title">Night font schedule</string>
+</resources>

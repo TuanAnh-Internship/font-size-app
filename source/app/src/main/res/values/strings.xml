@@ -1,5 +1,13 @@
 <resources>
     <string name="app_name">FontM</string>
-    <string name="app_full_name">FontM - Thay đổi phông chữ , kích cỡ</string>
+    <string name="app_full_name">FontM - Thay đổi phông chữ, kích cỡ</string>
     <string name="quick_settings_tile_label">Cỡ chữ FontM</string>
+    <string name="quick_settings_tile_desc">Chạm để xoay vòng cỡ chữ nhanh</string>
+    <string name="notification_channel_name">Phím tắt đổi cỡ chữ nhanh</string>
+    <string name="notification_channel_desc">Hiển thị thanh điều khiển cỡ chữ nhanh trên thông báo</string>
+    <string name="notification_title">FontM - Điều khiển cỡ chữ</string>
+    <string name="notification_current_scale">Cỡ chữ hiện tại: %s</string>
+    <string name="oem_fallback_dialog_title">Cần điều chỉnh thủ công</string>
+    <string name="camera_loupe_title">Kính lúp trợ năng</string>
+    <string name="night_schedule_alarm_title">Lịch hẹn cỡ chữ ban đêm</string>
 </resources>
